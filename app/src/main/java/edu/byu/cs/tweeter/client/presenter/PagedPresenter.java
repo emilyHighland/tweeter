@@ -2,9 +2,9 @@ package edu.byu.cs.tweeter.client.presenter;
 
 import java.util.List;
 
-import edu.byu.cs.tweeter.client.service.UserService;
-import edu.byu.cs.tweeter.client.service.observer.GetUserObserver;
-import edu.byu.cs.tweeter.client.service.observer.PagedObserver;
+import edu.byu.cs.tweeter.client.model.service.UserService;
+import edu.byu.cs.tweeter.client.model.observer.GetUserObserver;
+import edu.byu.cs.tweeter.client.model.observer.PagedObserver;
 import edu.byu.cs.tweeter.model.domain.User;
 
 public abstract class PagedPresenter<T> extends Presenter {

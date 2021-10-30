@@ -5,7 +5,7 @@ import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
 
-import edu.byu.cs.tweeter.client.service.UserService;
+import edu.byu.cs.tweeter.client.model.service.UserService;
 
 public class RegisterPresenter extends AuthenticatePresenter{
 
