@@ -10,7 +10,7 @@ public class User implements Comparable<User>, Serializable {
 
     private String firstName;
     private String lastName;
-    private String alias;
+    public String alias;
     private String imageUrl;
     private byte [] imageBytes;
 

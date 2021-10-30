@@ -6,7 +6,7 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.util.Pair;
+import util.Pair;
 
 /**
  * Background task that retrieves a page of followers.

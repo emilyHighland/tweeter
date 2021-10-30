@@ -4,7 +4,7 @@ import android.os.Handler;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.util.Pair;
+import util.Pair;
 
 /**
  * Background task that logs in a user (i.e., starts a session).

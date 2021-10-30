@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 
 import java.io.IOException;
 
-import edu.byu.cs.tweeter.util.FakeData;
+import util.FakeData;
 
 public abstract class BackgroundTask implements Runnable {
     private static final String LOG_TAG = "BackgroundTask";

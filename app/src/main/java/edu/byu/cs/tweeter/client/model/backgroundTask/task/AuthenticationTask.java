@@ -7,7 +7,7 @@ import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.util.Pair;
+import util.Pair;
 
 public abstract class AuthenticationTask extends BackgroundTask {
 
