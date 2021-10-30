@@ -10,7 +10,7 @@ import edu.byu.cs.tweeter.client.model.backgroundTask.handler.LoginHandler;
 import edu.byu.cs.tweeter.client.model.backgroundTask.handler.LogoutHandler;
 import edu.byu.cs.tweeter.client.model.backgroundTask.handler.RegisterHandler;
 import edu.byu.cs.tweeter.client.model.observer.AuthenticateObserver;
-import edu.byu.cs.tweeter.client.model.observer.GetUserObserver;
+import edu.byu.cs.tweeter.client.model.observer.UserObserver;
 import edu.byu.cs.tweeter.client.model.observer.SimpleNotificationObserver;
 
 // for service classes: use observer pattern to notify presenter that tasks are done
@@ -22,7 +22,9 @@ public class UserService {
         service = new Service();
     }
 
-    public void getUser(String alias, GetUserObserver observer){
+    public interface getUserObserver extends UserObserver { }
+
+    public void getUser(String alias, getUserObserver observer){
         GetUserTask getUserTask = new GetUserTask(Cache.getInstance().getCurrUserAuthToken(),
                 alias, new GetUserHandler(observer));
         service.runTask(getUserTask);
