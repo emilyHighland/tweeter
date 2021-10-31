@@ -19,7 +19,12 @@ public class FollowService {
      * @return the followees.
      */
     public FollowingResponse getFollowees(FollowingRequest request) {
-        return getFollowingDAO().getFollowees(request);
+        try {
+            return getFollowingDAO().getFollowees(request);
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("[Bad Request]");
+        }
     }
 
     /**

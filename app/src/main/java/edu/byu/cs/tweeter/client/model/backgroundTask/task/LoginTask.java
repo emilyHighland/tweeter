@@ -4,6 +4,8 @@ import android.os.Handler;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import util.Pair;
 
 /**
@@ -18,8 +20,18 @@ public class LoginTask extends AuthenticationTask {
 
     @Override
     protected Pair<User, AuthToken> runAuthenticationTask() {
-        User loggedInUser = getFakeData().getFirstUser();
-        AuthToken authToken = getFakeData().getAuthToken();
-        return new Pair<>(loggedInUser, authToken);
+        // request
+        // response = SF.login()
+        try {
+            LoginRequest request = new LoginRequest(username, password);
+            LoginResponse response = SF.login(request, "/login");
+            User loggedInUser = response.getUser();
+            AuthToken authToken = response.getAuthToken();
+            return new Pair<>(loggedInUser, authToken);
+        } catch (Exception e){
+            e.printStackTrace();
+            sendExceptionMessage(e);
+        }
+        return null;
     }
 }
