@@ -52,9 +52,9 @@ public class FollowersResponse extends PagedResponse{
 
         FollowersResponse that = (FollowersResponse) o;
 
-        return Objects.equals(followers, that.followers) &&
+        return (Objects.equals(followers, that.followers) &&
                 Objects.equals(this.getMessage(), that.getMessage()) &&
-                this.isSuccess() == that.isSuccess();
+                this.isSuccess() == that.isSuccess());
     }
 
     @Override
