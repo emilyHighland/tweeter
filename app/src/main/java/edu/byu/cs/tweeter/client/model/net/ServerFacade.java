@@ -115,4 +115,16 @@ public class ServerFacade {
             throw new RuntimeException(response.getMessage());
         }
     }
+
+
+    public PostStatusResponse postStatus(PostStatusRequest request, String urlPath)
+            throws IOException, TweeterRemoteException {
+        PostStatusResponse response = clientCommunicator.doPost(urlPath, request, null, PostStatusResponse.class);
+
+        if(response.isSuccess()) {
+            return response;
+        } else {
+            throw new RuntimeException(response.getMessage());
+        }
+    }
 }

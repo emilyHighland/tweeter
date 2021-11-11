@@ -1,8 +1,10 @@
 package edu.byu.cs.tweeter.server.service;
 
 import edu.byu.cs.tweeter.model.net.request.FeedRequest;
+import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.StoryRequest;
 import edu.byu.cs.tweeter.model.net.response.FeedResponse;
+import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.model.net.response.StoryResponse;
 import edu.byu.cs.tweeter.server.dao.FeedDAO;
 import edu.byu.cs.tweeter.server.dao.StoryDAO;
@@ -20,8 +22,17 @@ public class StatusService {
     }
 
     public FeedResponse getFeed(FeedRequest request){
-        try{
+        try {
             return getFeedDAO().getFeed(request);
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest]");
+        }
+    }
+
+    public PostStatusResponse postStatus(PostStatusRequest request){
+        try {
+            return getStoryDAO().postStatus(request);
         } catch (Exception e){
             e.printStackTrace();
             throw new RuntimeException("[BadRequest]");

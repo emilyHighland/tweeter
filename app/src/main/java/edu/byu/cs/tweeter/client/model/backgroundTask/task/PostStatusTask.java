@@ -14,6 +14,8 @@ import java.util.List;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
+import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
+import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 
 /**
  * Background task that posts a new status sent by a user.
@@ -25,17 +27,25 @@ public class PostStatusTask extends AuthorizedTask {
      * The new status being sent. Contains all properties of the status,
      * including the identity of the user sending the status.
      */
-    private Status status;
+    private String post;
     private String alias;
 
     public PostStatusTask(String post, AuthToken authToken, String alias, Handler messageHandler) {
         super(messageHandler, authToken);
         this.alias = alias;
+        this.post = post;
     }
 
     @Override
     protected void runTask() throws IOException {
-
+        try {
+            PostStatusRequest request = new PostStatusRequest(post, authToken, alias);
+            PostStatusResponse response = SF.postStatus(request, "/poststatus");
+            // send message?
+        } catch (Exception e){
+            e.printStackTrace();
+            sendExceptionMessage(e);
+        }
     }
 
     @Override
