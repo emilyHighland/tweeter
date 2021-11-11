@@ -7,8 +7,10 @@ import java.io.Serializable;
  */
 class Response implements Serializable {
 
-    private final boolean success;
-    private final String message;
+    public Response(){}
+
+    private boolean success;
+    private String message;
 
     /**
      * Creates an instance with a null message.

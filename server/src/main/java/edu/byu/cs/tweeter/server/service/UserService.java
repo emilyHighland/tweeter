@@ -27,7 +27,7 @@ public class UserService {
             // SO catch, then prefix error/exception message with regex:
             // 400 errors are request errors.... prefix "[Bad Request]" ....happen in service layer. invalid request or missing property you need.
             // try/catch the daos server errors "[Server Error]"
-            throw new RuntimeException("[Bad Request]");
+            throw new RuntimeException("[BadRequest]");
         }
 
         return new LoginResponse(user, authToken);

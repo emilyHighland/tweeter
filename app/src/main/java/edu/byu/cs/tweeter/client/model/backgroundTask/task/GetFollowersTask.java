@@ -6,6 +6,10 @@ import java.util.List;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.response.FollowersResponse;
+import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import util.Pair;
 
 /**
@@ -21,7 +25,21 @@ public class GetFollowersTask extends PagedUserTask {
 
     @Override
     protected Pair<List<User>, Boolean> getItems() {
-        Pair<List<User>, Boolean> pageOfUsers = getFakeData().getPageOfUsers(getLastItem(), getLimit(), targetUser);
-        return pageOfUsers;
+        try {
+            FollowersRequest request;
+            if (getLastItem() == null){
+                request = new FollowersRequest(authToken, targetUser.alias, getLimit(),
+                        null);
+            } else {
+                request = new FollowersRequest(authToken, targetUser.alias, getLimit(),
+                        getLastItem().alias);
+            }
+            FollowersResponse followersResponse = SF.getFollowers(request,"/getfollowers");
+            return new Pair<>(followersResponse.getFollowers(), followersResponse.isSuccess());
+        } catch (Exception e){
+            e.printStackTrace();
+            sendExceptionMessage(e);
+        }
+        return null;
     }
 }

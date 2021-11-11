@@ -7,9 +7,7 @@ import java.util.List;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
-import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
-import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import util.Pair;
 
 /**
@@ -25,20 +23,22 @@ public class GetFollowingTask extends PagedUserTask {
 
     @Override
     protected Pair<List<User>, Boolean> getItems() {
-        // request
-        // response = SF.login()
+
         try {
-            FollowingRequest request = new FollowingRequest(authToken, targetUser.alias, getLimit(),
-                    getLastItem().alias);
-            FollowingResponse response = SF.getFollowees(request,"/getfollowing/:authToken");
-            return new Pair<>(response.getFollowees(), response.isSuccess());
+            FollowingRequest request;
+            if (getLastItem() == null){
+                request = new FollowingRequest(authToken, targetUser.alias, getLimit(),
+                        null);
+            } else {
+                request = new FollowingRequest(authToken, targetUser.alias, getLimit(),
+                        getLastItem().alias);
+            }
+            FollowingResponse followingResponse = SF.getFollowees(request,"/getfollowing");
+            return new Pair<>(followingResponse.getFollowees(), followingResponse.isSuccess());
         } catch (Exception e){
             e.printStackTrace();
             sendExceptionMessage(e);
         }
         return null;
-
-
-//        return getFakeData().getPageOfUsers((User) getLastItem(), getLimit(), targetUser);
     }
 }

@@ -13,6 +13,8 @@ public class FollowingResponse extends PagedResponse {
 
     private List<User> followees;
 
+    public FollowingResponse(){}
+
     /**
      * Creates a response indicating that the corresponding request was unsuccessful. Sets the
      * success and more pages indicators to false.
@@ -31,6 +33,10 @@ public class FollowingResponse extends PagedResponse {
      */
     public FollowingResponse(List<User> followees, boolean hasMorePages) {
         super(true, hasMorePages);
+        this.followees = followees;
+    }
+
+    public void setFollowees(List<User> followees) {
         this.followees = followees;
     }
 
