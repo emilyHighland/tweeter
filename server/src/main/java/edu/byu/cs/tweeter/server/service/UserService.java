@@ -3,9 +3,11 @@ package edu.byu.cs.tweeter.server.service;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
+import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
 import edu.byu.cs.tweeter.server.dao.FollowDAO;
 import edu.byu.cs.tweeter.server.dao.UserDAO;
 import edu.byu.cs.tweeter.server.util.FakeData;
@@ -55,6 +57,17 @@ public class UserService {
 
         return new LoginResponse(user, authToken);
     }
+
+    public SimpleResponse logout(LogoutRequest request){
+        try {
+            getUserDAO().authenticateToken(request.getAuthToken());
+            return new SimpleResponse();
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest]");
+        }
+    }
+
 
     /**
      * Returns the dummy user to be returned by the login operation.

@@ -15,7 +15,7 @@ import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
-import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
+import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
 
 /**
  * Background task that posts a new status sent by a user.
@@ -40,7 +40,7 @@ public class PostStatusTask extends AuthorizedTask {
     protected void runTask() throws IOException {
         try {
             PostStatusRequest request = new PostStatusRequest(post, authToken, alias);
-            PostStatusResponse response = SF.postStatus(request, "/poststatus");
+            SimpleResponse response = SF.postStatus(request, "/poststatus");
             // send message?
         } catch (Exception e){
             e.printStackTrace();

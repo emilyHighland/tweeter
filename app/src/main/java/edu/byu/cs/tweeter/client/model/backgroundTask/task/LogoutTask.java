@@ -8,7 +8,9 @@ import java.io.IOException;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
+import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
+import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
 import util.Pair;
 
 /**
@@ -23,13 +25,13 @@ public class LogoutTask extends AuthorizedTask {
 
     @Override
     protected void runTask() throws IOException {
-//        try {
-//            LogoutRequest request = new LogoutRequest(authToken);
-//            SF.logout(request, "/logout");
-//        } catch (Exception e){
-//            e.printStackTrace();
-//            sendExceptionMessage(e);
-//        }
+        try {
+            LogoutRequest request = new LogoutRequest(authToken);
+            SimpleResponse response = SF.logout(request, "/logout");
+        } catch (Exception e){
+            e.printStackTrace();
+            sendExceptionMessage(e);
+        }
     }
 
     @Override

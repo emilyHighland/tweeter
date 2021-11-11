@@ -117,9 +117,20 @@ public class ServerFacade {
     }
 
 
-    public PostStatusResponse postStatus(PostStatusRequest request, String urlPath)
+    public SimpleResponse postStatus(PostStatusRequest request, String urlPath)
             throws IOException, TweeterRemoteException {
-        PostStatusResponse response = clientCommunicator.doPost(urlPath, request, null, PostStatusResponse.class);
+        SimpleResponse response = clientCommunicator.doPost(urlPath, request, null, SimpleResponse.class);
+
+        if(response.isSuccess()) {
+            return response;
+        } else {
+            throw new RuntimeException(response.getMessage());
+        }
+    }
+
+    public SimpleResponse logout(LogoutRequest request, String urlPath)
+            throws IOException, TweeterRemoteException {
+        SimpleResponse response = clientCommunicator.doPost(urlPath, request, null, SimpleResponse.class);
 
         if(response.isSuccess()) {
             return response;

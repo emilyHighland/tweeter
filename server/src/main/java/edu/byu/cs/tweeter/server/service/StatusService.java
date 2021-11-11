@@ -4,7 +4,7 @@ import edu.byu.cs.tweeter.model.net.request.FeedRequest;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.StoryRequest;
 import edu.byu.cs.tweeter.model.net.response.FeedResponse;
-import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
+import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
 import edu.byu.cs.tweeter.model.net.response.StoryResponse;
 import edu.byu.cs.tweeter.server.dao.FeedDAO;
 import edu.byu.cs.tweeter.server.dao.StoryDAO;
@@ -30,7 +30,7 @@ public class StatusService {
         }
     }
 
-    public PostStatusResponse postStatus(PostStatusRequest request){
+    public SimpleResponse postStatus(PostStatusRequest request){
         try {
             return getStoryDAO().postStatus(request);
         } catch (Exception e){
