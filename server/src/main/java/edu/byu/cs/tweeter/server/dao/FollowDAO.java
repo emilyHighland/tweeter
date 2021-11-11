@@ -6,8 +6,10 @@ import java.util.List;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
+import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowersResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
 import edu.byu.cs.tweeter.server.util.FakeData;
 
 /**
@@ -139,6 +141,24 @@ public class FollowDAO {
             }
         }
         return followersIndex;
+    }
+
+    public SimpleResponse follow(FollowsRequest request){
+        assert request.getAuthToken() != null;
+        assert request.getUserAlias() != null;
+
+        // TODO: increment followee count
+
+        return new SimpleResponse();
+    }
+
+    public SimpleResponse unfollow(FollowsRequest request){
+        assert request.getAuthToken() != null;
+        assert request.getUserAlias() != null;
+
+        // TODO: decrement followee count
+
+        return new SimpleResponse();
     }
 
     /**

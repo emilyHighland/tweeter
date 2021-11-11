@@ -128,6 +128,42 @@ public class ServerFacade {
         }
     }
 
+
+    public SimpleResponse follow(FollowsRequest request, String urlPath)
+            throws IOException, TweeterRemoteException {
+        SimpleResponse response = clientCommunicator.doPost(urlPath, request, null, SimpleResponse.class);
+
+        if(response.isSuccess()) {
+            return response;
+        } else {
+            throw new RuntimeException(response.getMessage());
+        }
+    }
+
+    public SimpleResponse unfollow(FollowsRequest request, String urlPath)
+            throws IOException, TweeterRemoteException {
+        SimpleResponse response = clientCommunicator.doPost(urlPath, request, null, SimpleResponse.class);
+
+        if(response.isSuccess()) {
+            return response;
+        } else {
+            throw new RuntimeException(response.getMessage());
+        }
+    }
+
+
+    public GetUserResponse getUser(GetUserRequest request, String urlPath)
+            throws IOException, TweeterRemoteException {
+        GetUserResponse response = clientCommunicator.doPost(urlPath, request, null, GetUserResponse.class);
+
+        if(response.isSuccess()) {
+            return response;
+        } else {
+            throw new RuntimeException(response.getMessage());
+        }
+    }
+
+
     public SimpleResponse logout(LogoutRequest request, String urlPath)
             throws IOException, TweeterRemoteException {
         SimpleResponse response = clientCommunicator.doPost(urlPath, request, null, SimpleResponse.class);

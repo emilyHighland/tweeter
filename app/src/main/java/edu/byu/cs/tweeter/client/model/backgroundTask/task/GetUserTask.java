@@ -5,6 +5,8 @@ import android.os.Handler;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
+import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 
 /**
  * Background task that returns the profile for a specified user.
@@ -18,6 +20,7 @@ public class GetUserTask extends AuthorizedTask {
      * Alias (or handle) for user whose profile is being retrieved.
      */
     private String alias;
+    private User user;
 
     public GetUserTask(AuthToken authToken, String alias, Handler messageHandler) {
         super(messageHandler, authToken);
@@ -26,11 +29,18 @@ public class GetUserTask extends AuthorizedTask {
 
     @Override
     protected void runTask() {
-        // Only needed because it will have actual code when we aren't using dummy data
+        try {
+            GetUserRequest request = new GetUserRequest(authToken, alias);
+            GetUserResponse response = SF.getUser(request, "/getuser");
+            user = response.getUser();
+            BackgroundTaskUtils.loadImage(user);
+        } catch (Exception e){
+            e.printStackTrace();
+            sendExceptionMessage(e);
+        }
     }
 
     private User getUser() {
-        User user = getFakeData().findUserByAlias(alias);
         return user;
     }
 

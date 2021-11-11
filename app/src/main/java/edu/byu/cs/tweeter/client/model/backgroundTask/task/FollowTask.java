@@ -7,6 +7,8 @@ import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
+import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
 
 /**
  * Background task that establishes a following relationship between two users.
@@ -26,7 +28,13 @@ public class FollowTask extends AuthorizedTask {
 
     @Override
     protected void runTask() throws IOException {
-
+        try {
+           FollowsRequest request = new FollowsRequest(authToken, followee.getAlias());
+            SimpleResponse response = SF.follow(request, "/follow");
+        } catch (Exception e){
+            e.printStackTrace();
+            sendExceptionMessage(e);
+        }
     }
 
     @Override

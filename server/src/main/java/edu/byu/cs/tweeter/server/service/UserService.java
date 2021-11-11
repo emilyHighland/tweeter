@@ -2,9 +2,11 @@ package edu.byu.cs.tweeter.server.service;
 
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
 import edu.byu.cs.tweeter.model.net.request.LoginRequest;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
+import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
@@ -62,6 +64,15 @@ public class UserService {
         try {
             getUserDAO().authenticateToken(request.getAuthToken());
             return new SimpleResponse();
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest]");
+        }
+    }
+
+    public GetUserResponse getUser(GetUserRequest request){
+        try {
+            return getUserDAO().getUser(request);
         } catch (Exception e){
             e.printStackTrace();
             throw new RuntimeException("[BadRequest]");
