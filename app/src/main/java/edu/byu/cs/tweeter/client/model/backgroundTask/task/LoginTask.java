@@ -20,8 +20,6 @@ public class LoginTask extends AuthenticationTask {
 
     @Override
     protected Pair<User, AuthToken> runAuthenticationTask() {
-        // request
-        // response = SF.login()
         try {
             LoginRequest request = new LoginRequest(username, password);
             LoginResponse response = SF.login(request, "/login");
