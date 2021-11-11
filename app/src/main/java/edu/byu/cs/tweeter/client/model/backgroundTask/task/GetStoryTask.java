@@ -26,10 +26,6 @@ public class GetStoryTask extends PagedStatusTask {
 
     @Override
     protected Pair<List<Status>, Boolean> getItems() {
-        Pair<List<Status>, Boolean> pageOfStatus = getFakeData().getPageOfStatus(getLastItem(), getLimit());
-
-
-
         try {
             StoryRequest request;
             if (getLastItem() == null){

@@ -3,14 +3,8 @@ package edu.byu.cs.tweeter.client.model.net;
 import java.io.IOException;
 
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
-import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
-import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
-import edu.byu.cs.tweeter.model.net.request.LoginRequest;
-import edu.byu.cs.tweeter.model.net.request.StoryRequest;
-import edu.byu.cs.tweeter.model.net.response.FollowersResponse;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
-import edu.byu.cs.tweeter.model.net.response.LoginResponse;
-import edu.byu.cs.tweeter.model.net.response.StoryResponse;
+import edu.byu.cs.tweeter.model.net.request.*;
+import edu.byu.cs.tweeter.model.net.response.*;
 
 /**
  * Acts as a Facade to the Tweeter server. All network requests to the server should go through
@@ -89,6 +83,21 @@ public class ServerFacade {
             throws IOException, TweeterRemoteException {
 
         StoryResponse response = clientCommunicator.doPost(urlPath, request, null, StoryResponse.class);
+
+        if(response.isSuccess()) {
+            return response;
+        } else {
+            throw new RuntimeException(response.getMessage());
+        }
+    }
+
+    /**
+     * Returns the list of statuses of a user's followers
+     */
+    public FeedResponse getFeed(FeedRequest request, String urlPath)
+            throws IOException, TweeterRemoteException {
+
+        FeedResponse response = clientCommunicator.doPost(urlPath, request, null, FeedResponse.class);
 
         if(response.isSuccess()) {
             return response;

@@ -7,6 +7,10 @@ import java.util.List;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.request.FeedRequest;
+import edu.byu.cs.tweeter.model.net.request.StoryRequest;
+import edu.byu.cs.tweeter.model.net.response.FeedResponse;
+import edu.byu.cs.tweeter.model.net.response.StoryResponse;
 import util.Pair;
 
 /**
@@ -22,7 +26,21 @@ public class GetFeedTask extends PagedStatusTask {
 
     @Override
     protected Pair<List<Status>, Boolean> getItems() {
-        Pair<List<Status>, Boolean> pageOfStatus = getFakeData().getPageOfStatus(getLastItem(), getLimit());
-        return pageOfStatus;
+        try {
+            FeedRequest request;
+            if (getLastItem() == null){
+                request = new FeedRequest(authToken, targetUser.alias, getLimit(),
+                        null);
+            } else {
+                request = new FeedRequest(authToken, targetUser.alias, getLimit(),
+                        getLastItem());
+            }
+            FeedResponse feedResponse = SF.getFeed(request,"/getfeed");
+            return new Pair<>(feedResponse.getStatuses(), feedResponse.isSuccess());
+        } catch (Exception e){
+            e.printStackTrace();
+            sendExceptionMessage(e);
+        }
+        return null;
     }
 }
