@@ -1,17 +1,17 @@
 package edu.byu.cs.tweeter.client.model.service;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.GetUserTask;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.LoginTask;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.LogoutTask;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.RegisterTask;
 import edu.byu.cs.tweeter.client.model.backgroundTask.handler.GetUserHandler;
 import edu.byu.cs.tweeter.client.model.backgroundTask.handler.LoginHandler;
 import edu.byu.cs.tweeter.client.model.backgroundTask.handler.LogoutHandler;
 import edu.byu.cs.tweeter.client.model.backgroundTask.handler.RegisterHandler;
+import edu.byu.cs.tweeter.client.model.backgroundTask.task.GetUserTask;
+import edu.byu.cs.tweeter.client.model.backgroundTask.task.LoginTask;
+import edu.byu.cs.tweeter.client.model.backgroundTask.task.LogoutTask;
+import edu.byu.cs.tweeter.client.model.backgroundTask.task.RegisterTask;
 import edu.byu.cs.tweeter.client.model.observer.AuthenticateObserver;
-import edu.byu.cs.tweeter.client.model.observer.UserObserver;
 import edu.byu.cs.tweeter.client.model.observer.SimpleNotificationObserver;
+import edu.byu.cs.tweeter.client.model.observer.UserObserver;
 
 // for service classes: use observer pattern to notify presenter that tasks are done
 public class UserService {

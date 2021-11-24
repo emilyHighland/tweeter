@@ -11,15 +11,13 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatDialogFragment;
-
-import java.util.Locale;
-
 import edu.byu.cs.client.R;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.view.util.ImageUtils;
+
+import java.util.Locale;
 
 /**
  * Implements the pop-up dialog for sending a new status.

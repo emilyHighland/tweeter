@@ -1,27 +1,15 @@
 package edu.byu.cs.tweeter.client.model.service;
 
-import java.util.concurrent.ExecutorService;
-
 import edu.byu.cs.tweeter.client.cache.Cache;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.FollowTask;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.GetFollowersCountTask;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.GetFollowersTask;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.GetFollowingCountTask;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.GetFollowingTask;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.IsFollowerTask;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.UnfollowTask;
-import edu.byu.cs.tweeter.client.model.backgroundTask.handler.FollowHandler;
-import edu.byu.cs.tweeter.client.model.backgroundTask.handler.GetFollowersCountHandler;
-import edu.byu.cs.tweeter.client.model.backgroundTask.handler.GetFollowersHandler;
-import edu.byu.cs.tweeter.client.model.backgroundTask.handler.GetFollowingCountHandler;
-import edu.byu.cs.tweeter.client.model.backgroundTask.handler.GetFollowingHandler;
-import edu.byu.cs.tweeter.client.model.backgroundTask.handler.IsFollowerHandler;
-import edu.byu.cs.tweeter.client.model.backgroundTask.handler.UnfollowHandler;
+import edu.byu.cs.tweeter.client.model.backgroundTask.handler.*;
+import edu.byu.cs.tweeter.client.model.backgroundTask.task.*;
 import edu.byu.cs.tweeter.client.model.observer.CountObserver;
 import edu.byu.cs.tweeter.client.model.observer.IsFollowerObserver;
 import edu.byu.cs.tweeter.client.model.observer.PagedObserver;
 import edu.byu.cs.tweeter.client.model.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.User;
+
+import java.util.concurrent.ExecutorService;
 
 // Operations that relate to followers or followees
 // run background tasks

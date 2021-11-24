@@ -2,11 +2,10 @@ package edu.byu.cs.tweeter.client.model.backgroundTask.task;
 
 import android.os.Bundle;
 import android.os.Handler;
-
-import java.io.IOException;
-
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+
+import java.io.IOException;
 
 public abstract class GetCountTask extends AuthorizedTask {
 

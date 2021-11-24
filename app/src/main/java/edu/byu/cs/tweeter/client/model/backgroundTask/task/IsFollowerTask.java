@@ -2,12 +2,11 @@ package edu.byu.cs.tweeter.client.model.backgroundTask.task;
 
 import android.os.Bundle;
 import android.os.Handler;
+import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.User;
 
 import java.io.IOException;
 import java.util.Random;
-
-import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.User;
 
 /**
  * Background task that determines if one user is following another.

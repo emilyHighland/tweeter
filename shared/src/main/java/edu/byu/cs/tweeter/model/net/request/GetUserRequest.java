@@ -6,6 +6,7 @@ public class GetUserRequest {
 
     AuthToken authToken;
     String alias;
+//    String currentUserAlias;
 
     private GetUserRequest(){}
 
@@ -29,4 +30,12 @@ public class GetUserRequest {
     public void setAlias(String alias) {
         this.alias = alias;
     }
+
+//    public String getCurrentUserAlias() {
+//        return currentUserAlias;
+//    }
+//
+//    public void setCurrentUserAlias(String currentUserAlias) {
+//        this.currentUserAlias = currentUserAlias;
+//    }
 }

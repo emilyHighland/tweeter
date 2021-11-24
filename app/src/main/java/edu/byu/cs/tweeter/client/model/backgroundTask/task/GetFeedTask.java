@@ -1,17 +1,14 @@
 package edu.byu.cs.tweeter.client.model.backgroundTask.task;
 
 import android.os.Handler;
-
-import java.util.List;
-
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FeedRequest;
-import edu.byu.cs.tweeter.model.net.request.StoryRequest;
 import edu.byu.cs.tweeter.model.net.response.FeedResponse;
-import edu.byu.cs.tweeter.model.net.response.StoryResponse;
 import util.Pair;
+
+import java.util.List;
 
 /**
  * Background task that retrieves a page of statuses from a user's feed.

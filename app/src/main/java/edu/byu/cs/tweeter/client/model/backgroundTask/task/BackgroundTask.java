@@ -4,13 +4,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
-
 import androidx.annotation.NonNull;
+import edu.byu.cs.tweeter.client.model.net.ServerFacade;
 
 import java.io.IOException;
-
-import edu.byu.cs.tweeter.client.model.net.ServerFacade;
-import util.FakeData;
 
 public abstract class BackgroundTask implements Runnable {
     private static final String LOG_TAG = "BackgroundTask";
@@ -43,10 +40,6 @@ public abstract class BackgroundTask implements Runnable {
     }
 
     protected abstract void runTask() throws IOException;
-
-    protected FakeData getFakeData() {
-        return new FakeData();
-    }
 
     protected abstract void loadMessageBundle(Bundle msgBundle);
 

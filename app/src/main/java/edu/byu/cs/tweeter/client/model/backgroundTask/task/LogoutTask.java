@@ -2,16 +2,11 @@ package edu.byu.cs.tweeter.client.model.backgroundTask.task;
 
 import android.os.Bundle;
 import android.os.Handler;
+import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
+import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
 
 import java.io.IOException;
-
-import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.LoginRequest;
-import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
-import edu.byu.cs.tweeter.model.net.response.LoginResponse;
-import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
-import util.Pair;
 
 /**
  * Background task that logs out a user (i.e., ends a session).

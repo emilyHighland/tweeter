@@ -3,6 +3,8 @@ package edu.byu.cs.tweeter.model.net.response;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 
+import java.util.Objects;
+
 public class RegisterResponse extends Response {
 
     private User user;
@@ -32,5 +34,18 @@ public class RegisterResponse extends Response {
 
     public void setAuthToken(AuthToken authToken) {
         this.authToken = authToken;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RegisterResponse that = (RegisterResponse) o;
+        return Objects.equals(user, that.user) && Objects.equals(authToken, that.authToken);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(user, authToken);
     }
 }

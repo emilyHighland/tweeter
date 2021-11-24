@@ -1,15 +1,15 @@
 package edu.byu.cs.tweeter.client.presenter;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 import edu.byu.cs.tweeter.client.cache.Cache;
+import edu.byu.cs.tweeter.client.model.observer.CountObserver;
+import edu.byu.cs.tweeter.client.model.observer.IsFollowerObserver;
 import edu.byu.cs.tweeter.client.model.service.FollowService;
 import edu.byu.cs.tweeter.client.model.service.StatusService;
 import edu.byu.cs.tweeter.client.model.service.UserService;
-import edu.byu.cs.tweeter.client.model.observer.CountObserver;
-import edu.byu.cs.tweeter.client.model.observer.IsFollowerObserver;
 import edu.byu.cs.tweeter.model.domain.User;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainPresenter extends Presenter{
 

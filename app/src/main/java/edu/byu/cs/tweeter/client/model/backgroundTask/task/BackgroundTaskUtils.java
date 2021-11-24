@@ -1,11 +1,10 @@
 package edu.byu.cs.tweeter.client.model.backgroundTask.task;
 
 import android.util.Log;
-
-import java.io.IOException;
-
 import edu.byu.cs.tweeter.client.util.ByteArrayUtils;
 import edu.byu.cs.tweeter.model.domain.User;
+
+import java.io.IOException;
 
 /**
  * BackgroundTaskUtils contains utility methods needed by background tasks.

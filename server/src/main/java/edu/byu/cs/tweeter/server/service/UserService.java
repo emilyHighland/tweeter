@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.server.service;
 
+import com.google.inject.Inject;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
@@ -10,74 +11,131 @@ import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
-import edu.byu.cs.tweeter.server.dao.FollowDAO;
-import edu.byu.cs.tweeter.server.dao.UserDAO;
+import edu.byu.cs.tweeter.server.dao.UserDAOInterface;
+import edu.byu.cs.tweeter.server.dao.factories.DAOFactoryInterface;
 import edu.byu.cs.tweeter.server.util.FakeData;
+import edu.byu.cs.tweeter.server.util.Pair;
+import edu.byu.cs.tweeter.server.util.SaltedSHAHashing;
 
+// need API gateway to know which type of responses out of lambda are good/bad
+// SO catch, then prefix error/exception message with regex:
+// 400 errors are request errors.... prefix "[Bad Request]" ....happen in service layer. invalid request or missing property you need.
+// try/catch the daos server errors "[Server Error]"
 public class UserService {
 
+    private final DAOFactoryInterface factory;
+
+    @Inject
+    public UserService(DAOFactoryInterface factory){
+        this.factory = factory;
+    }
+
+    /** REGISTER */
     public RegisterResponse register(RegisterRequest request){
-        // TODO: Generates dummy data. Replace with a real implementation.
-        User user = getDummyUser();
-        AuthToken authToken = getDummyAuthToken();
+
+        // upload image to S3 getting back image url
+        String url = this.factory.getImageDAO().uploadImage(request.getUsername(), request.getImage());
+
+        // salt and hash password before uploading
+        Pair<String,String> saltAndHashed = new SaltedSHAHashing().getSecurePassword(request.getPassword());
 
         try {
-            getUserDAO().authenticateToken(authToken);
-            getUserDAO().authenticateUser(user);
+            // check if user is not already a user?
+            this.factory.getUserDAO().addUser(request.getUsername(), request.getFirstName(), request.getLastName(), url,
+                    saltAndHashed.getFirst(), saltAndHashed.getSecond(),
+                    0, 0);
+
+            User user = new User(request.getFirstName(), request.getLastName(), url);
+            AuthToken authToken = new AuthToken();
+
+            // add authToken
+            this.factory.getAuthTokenDAO().addAuthToken(authToken, request.getUsername());
+
+            return new RegisterResponse(user, authToken);
+
         } catch(Exception e){
             e.printStackTrace();
-            // need API gateway to know which type of responses out of lambda are good/bad
-            // SO catch, then prefix error/exception message with regex:
-            // 400 errors are request errors.... prefix "[Bad Request]" ....happen in service layer. invalid request or missing property you need.
-            // try/catch the daos server errors "[Server Error]"
             throw new RuntimeException("[BadRequest]");
         }
-
-        return new RegisterResponse(user, authToken);
     }
 
 
+    /** LOGIN */
     public LoginResponse login(LoginRequest request) {
+//        try {
+            // authenticate user to login
+            Pair<User,String> UserAndPassword = this.factory.getUserDAO().getUserByID(request.getUsername());
 
-        // TODO: Generates dummy data. Replace with a real implementation.
-        // TODO: does this get info from the request object?
-        //  AND how do we know what type of exception we need to catch?
-        User user = getDummyUser();
-        AuthToken authToken = getDummyAuthToken();
+            if (!authenticatePassword(request.getPassword(), UserAndPassword.getSecond())){
+                throw new RuntimeException("[BadRequest] - invalid password");
+            }
 
-        try {
-            getUserDAO().authenticateToken(authToken);
-            getUserDAO().authenticateUser(user);
-        } catch(Exception e){
-            e.printStackTrace();
-            // need API gateway to know which type of responses out of lambda are good/bad
-            // SO catch, then prefix error/exception message with regex:
-            // 400 errors are request errors.... prefix "[Bad Request]" ....happen in service layer. invalid request or missing property you need.
-            // try/catch the daos server errors "[Server Error]"
-            throw new RuntimeException("[BadRequest]");
-        }
+            // add authToken to table
+            AuthToken authToken = new AuthToken();
+            this.factory.getAuthTokenDAO().addAuthToken(authToken, request.getUsername());
 
-        return new LoginResponse(user, authToken);
+            return new LoginResponse(UserAndPassword.getFirst(), authToken);
+
+//        } catch(Exception e){
+//            e.printStackTrace();
+//            throw new RuntimeException("[BadRequest]");
+//        }
     }
 
+
+    /** LOGOUT */
     public SimpleResponse logout(LogoutRequest request){
         try {
-            getUserDAO().authenticateToken(request.getAuthToken());
+            this.factory.getAuthTokenDAO().deleteAuthToken(request.getAuthToken());
             return new SimpleResponse();
         } catch (Exception e){
             e.printStackTrace();
-            throw new RuntimeException("[BadRequest]");
+            throw new RuntimeException("[BadRequest] - unable to logout");
         }
     }
 
+
+    /** GET USER */
     public GetUserResponse getUser(GetUserRequest request){
+        assert request.getAlias() != null;
+        assert request.getAuthToken() != null;
+
         try {
-            return getUserDAO().getUser(request);
+            if (!isValidAuthToken(request.getAlias(), request.getAuthToken()))
+                throw new RuntimeException("[AuthError] unauthenticated request");
+
+            Pair<User,String> userPassword = this.factory.getUserDAO().getUserByID(request.getAlias());
+
+            if (userPassword.getFirst() == null) {
+                throw new RuntimeException(String.format("[BadRequest] requested user %s does not exist", request.getAlias()));
+            }
+
+            return new GetUserResponse(userPassword.getFirst());
         } catch (Exception e){
             e.printStackTrace();
-            throw new RuntimeException("[BadRequest]");
+            throw e;
         }
     }
+
+    private boolean authenticatePassword(String suppliedPassword, String securePassword) {
+        // salt & hash request password to see if it's the same as queried_result_password + salt
+        String regeneratedPasswordToVerify = new SaltedSHAHashing().getSecurePassword(suppliedPassword, this.factory.getUserDAO().getUsersSalt());
+        System.out.println("Regenerated Password: " + regeneratedPasswordToVerify);
+
+        if (securePassword.equals(regeneratedPasswordToVerify)){
+            System.out.println("Passwords are the same: " + securePassword.equals(regeneratedPasswordToVerify));
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isValidAuthToken(String alias, AuthToken currentAuthToken){
+        String dbAuthToken = this.factory.getAuthTokenDAO().getAuthToken(alias);
+        return dbAuthToken.equals(currentAuthToken.getToken());
+    }
+
+
+
 
 
     /**
@@ -108,16 +166,5 @@ public class UserService {
      */
     FakeData getFakeData() {
         return new FakeData();
-    }
-
-    /**
-     * Returns an instance of {@link UserDAO}. Allows mocking of the UserDAO class
-     * for testing purposes. All usages of UserDAO should get their UserDAO
-     * instance from this method to allow for mocking of the instance.
-     *
-     * @return the instance.
-     */
-    UserDAO getUserDAO() {
-        return new UserDAO();
     }
 }

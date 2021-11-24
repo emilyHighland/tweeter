@@ -1,10 +1,10 @@
 package edu.byu.cs.tweeter.client.model.net;
 
-import java.io.IOException;
-
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.*;
 import edu.byu.cs.tweeter.model.net.response.*;
+
+import java.io.IOException;
 
 /**
  * Acts as a Facade to the Tweeter server. All network requests to the server should go through

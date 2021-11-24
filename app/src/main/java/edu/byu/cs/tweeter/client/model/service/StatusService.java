@@ -1,12 +1,12 @@
 package edu.byu.cs.tweeter.client.model.service;
 
 import edu.byu.cs.tweeter.client.cache.Cache;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.GetFeedTask;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.GetStoryTask;
-import edu.byu.cs.tweeter.client.model.backgroundTask.task.PostStatusTask;
 import edu.byu.cs.tweeter.client.model.backgroundTask.handler.GetFeedHandler;
 import edu.byu.cs.tweeter.client.model.backgroundTask.handler.GetStoryHandler;
 import edu.byu.cs.tweeter.client.model.backgroundTask.handler.PostStatusHandler;
+import edu.byu.cs.tweeter.client.model.backgroundTask.task.GetFeedTask;
+import edu.byu.cs.tweeter.client.model.backgroundTask.task.GetStoryTask;
+import edu.byu.cs.tweeter.client.model.backgroundTask.task.PostStatusTask;
 import edu.byu.cs.tweeter.client.model.observer.PagedObserver;
 import edu.byu.cs.tweeter.client.model.observer.SimpleNotificationObserver;
 import edu.byu.cs.tweeter.model.domain.AuthToken;

@@ -2,14 +2,13 @@ package edu.byu.cs.tweeter.client.model.backgroundTask.task;
 
 import android.os.Bundle;
 import android.os.Handler;
+import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.domain.User;
+import util.Pair;
 
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.List;
-
-import edu.byu.cs.tweeter.model.domain.AuthToken;
-import edu.byu.cs.tweeter.model.domain.User;
-import util.Pair;
 
 public abstract class PagedTask<T> extends AuthorizedTask {
     public static final String ITEMS_KEY = "items";

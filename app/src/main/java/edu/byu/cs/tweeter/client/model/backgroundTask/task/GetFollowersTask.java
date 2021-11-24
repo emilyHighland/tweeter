@@ -1,16 +1,13 @@
 package edu.byu.cs.tweeter.client.model.backgroundTask.task;
 
 import android.os.Handler;
-
-import java.util.List;
-
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
-import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowersResponse;
-import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import util.Pair;
+
+import java.util.List;
 
 /**
  * Background task that retrieves a page of followers.

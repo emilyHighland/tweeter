@@ -1,7 +1,6 @@
 package edu.byu.cs.tweeter.client.model.backgroundTask.handler;
 
 import android.os.Bundle;
-
 import edu.byu.cs.tweeter.client.model.backgroundTask.task.GetUserTask;
 import edu.byu.cs.tweeter.client.model.observer.UserObserver;
 import edu.byu.cs.tweeter.model.domain.User;
