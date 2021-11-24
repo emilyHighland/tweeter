@@ -4,8 +4,8 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 
 public class FollowsRequest {
 
-    AuthToken authToken;
-    String userAlias;
+    private AuthToken authToken;
+    private String userAlias;
 
     private FollowsRequest(){}
 

@@ -1,22 +1,20 @@
 package edu.byu.cs.tweeter.model.net.request;
 
-import edu.byu.cs.tweeter.model.domain.AuthToken;
-
 public class LogoutRequest {
 
-    AuthToken authToken;
+    private String authToken;
 
     private LogoutRequest(){}
 
-    public LogoutRequest(AuthToken authToken) {
+    public LogoutRequest(String authToken) {
         this.authToken = authToken;
     }
 
-    public AuthToken getAuthToken() {
+    public String getAuthToken() {
         return authToken;
     }
 
-    public void setAuthToken(AuthToken authToken) {
+    public void setAuthToken(String authToken) {
         this.authToken = authToken;
     }
 }

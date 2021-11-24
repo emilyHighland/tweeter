@@ -11,18 +11,17 @@ import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
 import edu.byu.cs.tweeter.model.net.response.LoginResponse;
 import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
 import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
-import edu.byu.cs.tweeter.server.dao.UserDAOInterface;
 import edu.byu.cs.tweeter.server.dao.factories.DAOFactoryInterface;
-import edu.byu.cs.tweeter.server.util.FakeData;
 import edu.byu.cs.tweeter.server.util.Pair;
-import edu.byu.cs.tweeter.server.util.SaltedSHAHashing;
 
-// need API gateway to know which type of responses out of lambda are good/bad
-// SO catch, then prefix error/exception message with regex:
-// 400 errors are request errors.... prefix "[Bad Request]" ....happen in service layer. invalid request or missing property you need.
-// try/catch the daos server errors "[Server Error]"
+import javax.crypto.SecretKeyFactory;
+import javax.crypto.spec.PBEKeySpec;
+import java.math.BigInteger;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.security.spec.InvalidKeySpecException;
+
 public class UserService {
-
     private final DAOFactoryInterface factory;
 
     @Inject
@@ -36,14 +35,13 @@ public class UserService {
         // upload image to S3 getting back image url
         String url = this.factory.getImageDAO().uploadImage(request.getUsername(), request.getImage());
 
-        // salt and hash password before uploading
-        Pair<String,String> saltAndHashed = new SaltedSHAHashing().getSecurePassword(request.getPassword());
-
         try {
+            // salt and hash password before uploading
+            String saltAndHashedPassword = new SHA1Hashing().getNewPassword(request.getPassword());
+
             // check if user is not already a user?
             this.factory.getUserDAO().addUser(request.getUsername(), request.getFirstName(), request.getLastName(), url,
-                    saltAndHashed.getFirst(), saltAndHashed.getSecond(),
-                    0, 0);
+                    saltAndHashedPassword, 0, 0);
 
             User user = new User(request.getFirstName(), request.getLastName(), url);
             AuthToken authToken = new AuthToken();
@@ -61,37 +59,42 @@ public class UserService {
 
 
     /** LOGIN */
-    public LoginResponse login(LoginRequest request) {
-//        try {
-            // authenticate user to login
-            Pair<User,String> UserAndPassword = this.factory.getUserDAO().getUserByID(request.getUsername());
+    public LoginResponse login(LoginRequest request){
+        // authenticate user to login
+        Pair<User,String> UserPassword = this.factory.getUserDAO().getUserByID(request.getUsername());
 
-            if (!authenticatePassword(request.getPassword(), UserAndPassword.getSecond())){
-                throw new RuntimeException("[BadRequest] - invalid password");
-            }
+        System.out.println("GOT USER BY ID");
 
-            // add authToken to table
-            AuthToken authToken = new AuthToken();
-            this.factory.getAuthTokenDAO().addAuthToken(authToken, request.getUsername());
+        boolean match = false;
+        try {
+            match = new SHA1Hashing().validatePassword(request.getPassword(), UserPassword.getSecond());
+        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        System.out.println("Passwords Match: " + match);
 
-            return new LoginResponse(UserAndPassword.getFirst(), authToken);
+        if (!match){
+            throw new RuntimeException("[BadRequest] - invalid password");
+        }
+        System.out.println("PASSWORD MATCHES");
 
-//        } catch(Exception e){
-//            e.printStackTrace();
-//            throw new RuntimeException("[BadRequest]");
-//        }
+        // add authToken to table
+        AuthToken authToken = new AuthToken();
+        this.factory.getAuthTokenDAO().addAuthToken(authToken, request.getUsername());
+
+        return new LoginResponse(UserPassword.getFirst(), authToken);
     }
 
 
     /** LOGOUT */
     public SimpleResponse logout(LogoutRequest request){
-        try {
-            this.factory.getAuthTokenDAO().deleteAuthToken(request.getAuthToken());
-            return new SimpleResponse();
-        } catch (Exception e){
-            e.printStackTrace();
-            throw new RuntimeException("[BadRequest] - unable to logout");
-        }
+        System.out.println("LOGOUT REQUEST: " + request.getAuthToken());
+
+        this.factory.getAuthTokenDAO().deleteAuthToken(request.getAuthToken());
+
+        System.out.println("DELETED AUTHTOKEN!");
+
+        return new SimpleResponse();
     }
 
 
@@ -104,31 +107,20 @@ public class UserService {
             if (!isValidAuthToken(request.getAlias(), request.getAuthToken()))
                 throw new RuntimeException("[AuthError] unauthenticated request");
 
-            Pair<User,String> userPassword = this.factory.getUserDAO().getUserByID(request.getAlias());
+            Pair<User,String> UserPass = this.factory.getUserDAO().getUserByID(request.getAlias());
 
-            if (userPassword.getFirst() == null) {
+            if (UserPass.getFirst() == null) {
                 throw new RuntimeException(String.format("[BadRequest] requested user %s does not exist", request.getAlias()));
             }
 
-            return new GetUserResponse(userPassword.getFirst());
+            return new GetUserResponse(UserPass.getFirst());
         } catch (Exception e){
             e.printStackTrace();
             throw e;
         }
     }
 
-    private boolean authenticatePassword(String suppliedPassword, String securePassword) {
-        // salt & hash request password to see if it's the same as queried_result_password + salt
-        String regeneratedPasswordToVerify = new SaltedSHAHashing().getSecurePassword(suppliedPassword, this.factory.getUserDAO().getUsersSalt());
-        System.out.println("Regenerated Password: " + regeneratedPasswordToVerify);
-
-        if (securePassword.equals(regeneratedPasswordToVerify)){
-            System.out.println("Passwords are the same: " + securePassword.equals(regeneratedPasswordToVerify));
-            return true;
-        }
-        return false;
-    }
-
+    /** VALIDATE */
     private boolean isValidAuthToken(String alias, AuthToken currentAuthToken){
         String dbAuthToken = this.factory.getAuthTokenDAO().getAuthToken(alias);
         return dbAuthToken.equals(currentAuthToken.getToken());
@@ -136,35 +128,73 @@ public class UserService {
 
 
 
+    /** S&H */
+    public static class SHA1Hashing {
+        public String getNewPassword(String registerPassword) {
+            // Store this in database
+            String generatedSecuredPasswordHash = null;
+            try {
+                generatedSecuredPasswordHash = generateStrongPasswordHash(registerPassword);
+            } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Generated Password: " + generatedSecuredPasswordHash);
 
+            return generatedSecuredPasswordHash;
+        }
 
-    /**
-     * Returns the dummy user to be returned by the login operation.
-     * This is written as a separate method to allow mocking of the dummy user.
-     *
-     * @return a dummy user.
-     */
-    User getDummyUser() {
-        return getFakeData().getFirstUser();
-    }
+        private boolean validatePassword(String originalPassword, String storedPassword) throws InvalidKeySpecException, NoSuchAlgorithmException {
+            String[] parts = storedPassword.split(":");
+            Integer iterations = Integer.parseInt(parts[0]);
+            byte[] salt = fromHex(parts[1]);
+            byte[] hash = fromHex(parts[2]);
 
-    /**
-     * Returns the dummy auth token to be returned by the login operation.
-     * This is written as a separate method to allow mocking of the dummy auth token.
-     *
-     * @return a dummy auth token.
-     */
-    AuthToken getDummyAuthToken() {
-        return getFakeData().getAuthToken();
-    }
+            PBEKeySpec spec = new PBEKeySpec(originalPassword.toCharArray(), salt, iterations, hash.length * 8);
+            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            byte[] testHash = skf.generateSecret(spec).getEncoded();
 
-    /**
-     * Returns the {@link FakeData} object used to generate dummy users and auth tokens.
-     * This is written as a separate method to allow mocking of the {@link FakeData}.
-     *
-     * @return a {@link FakeData} instance.
-     */
-    FakeData getFakeData() {
-        return new FakeData();
+            int diff = hash.length ^ testHash.length;
+            for (int i = 0; i < hash.length && i < testHash.length; i++) {
+                diff |= hash[i] ^ testHash[i];
+            }
+            return diff == 0;
+        }
+
+        private byte[] fromHex(String hex){
+            byte[] bytes = new byte[hex.length() / 2];
+            for(int i = 0; i<bytes.length ;i++) {
+                bytes[i] = (byte)Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
+            }
+            return bytes;
+        }
+
+        private String generateStrongPasswordHash(String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
+            int iterations = 1000;
+            char[] chars = password.toCharArray();
+            byte[] salt = getSalt();
+
+            PBEKeySpec spec = new PBEKeySpec(chars, salt, iterations, 64 * 8);
+            SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
+            byte[] hash = skf.generateSecret(spec).getEncoded();
+            return iterations + ":" + toHex(salt) + ":" + toHex(hash);
+        }
+
+        private static byte[] getSalt() throws NoSuchAlgorithmException {
+            SecureRandom sr = SecureRandom.getInstance("SHA1PRNG");
+            byte[] salt = new byte[16];
+            sr.nextBytes(salt);
+            return salt;
+        }
+
+        private String toHex(byte[] array) {
+            BigInteger bi = new BigInteger(1, array);
+            String hex = bi.toString(16);
+            int paddingLength = (array.length * 2) - hex.length();
+            if(paddingLength > 0) {
+                return String.format("%0"  +paddingLength + "d", 0) + hex;
+            } else{
+                return hex;
+            }
+        }
     }
 }

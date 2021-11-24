@@ -30,9 +30,8 @@ public class DynamoAuthTokenDAO extends Dynamo implements AuthTokenDAOInterface 
 
             System.out.println("Adding a new authToken...");
             PutItemOutcome outcome = table
-                    .putItem(new Item().withPrimaryKey("authToken", authToken.getToken(),
-                                    "timestamp", UNIXmillis)
-                            .with("alias", alias));
+                    .putItem(new Item().withPrimaryKey("authToken", authToken.getToken())
+                            .with("timestamp", UNIXmillis));
 
             System.out.println("Success adding authToken!!!\nOUTCOME = " + outcome);
 
@@ -63,7 +62,7 @@ public class DynamoAuthTokenDAO extends Dynamo implements AuthTokenDAOInterface 
     }
 
     @Override
-    public void deleteAuthToken(AuthToken authToken) {
+    public void deleteAuthToken(String authToken) {
         Table table = getDB().getTable("authTokens");
 
         DeleteItemSpec deleteItemSpec = new DeleteItemSpec()

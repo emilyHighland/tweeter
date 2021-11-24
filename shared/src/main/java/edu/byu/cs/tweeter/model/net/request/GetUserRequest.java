@@ -4,8 +4,8 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 
 public class GetUserRequest {
 
-    AuthToken authToken;
-    String alias;
+    private AuthToken authToken;
+    private String alias;
 //    String currentUserAlias;
 
     private GetUserRequest(){}

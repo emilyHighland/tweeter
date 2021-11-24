@@ -13,33 +13,30 @@ import edu.byu.cs.tweeter.server.util.Pair;
 
 public class DynamoUserDAO extends Dynamo implements UserDAOInterface {
 
-    private String salt;
-
     @Inject
     public DynamoUserDAO() {}
 
     @Override
     public void addUser(String alias, String firstName, String lastName, String url,
-                        String salt, String hashed,
-                        int followerCount, int followeeCount) {
+                        String hashedPassword, int followerCount, int followeeCount) {
         try {
             Table table = getDB().getTable("users");
             System.out.println("Adding a new item...");
             PutItemOutcome outcome = table
                     .putItem(new Item().withPrimaryKey("alias", alias)
-                            .with("first_name", firstName)
-                            .with("last_name", lastName)
-                            .with("image_url", url)
-                            .with("salt", salt)
-                            .with("password", hashed)
-                            .with("follower_count", followerCount)
-                            .with("followee_count", followeeCount));
+                            .withString("first_name", firstName)
+                            .withString("last_name", lastName)
+                            .withString("image_url", url)
+                            .withString("password", hashedPassword)
+                            .withNumber("follower_count", followerCount)
+                            .withNumber("followee_count", followeeCount));
+
+            System.out.println("GetItem succeeded: " + outcome);
 
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("[ServerError] - Unable to add user: " + alias);
         }
-
     }
 
     @Override
@@ -51,16 +48,23 @@ public class DynamoUserDAO extends Dynamo implements UserDAOInterface {
         try {
             System.out.println("Attempting to read the item...");
             Item outcome = table.getItem(spec);
-            System.out.println("GetItem succeeded: " + outcome);
+            System.out.println("GetItem succeeded: " + outcome.toJSONPretty());
 
-            salt = (String) outcome.get("salt");
             String securePassword = (String) outcome.get("password");
 
-//            User user = new User(outcome.);
-//
-//            return new Pair<>(user, securePassword);
+            System.out.println("PRINTING PASSWORD: " + securePassword);
 
-            return null;
+            String fname = (String) outcome.get("first_name");
+            String lname = (String) outcome.get("last_name");
+            String imageURL = (String) outcome.get("image_url");
+
+            // firstName, lastName, imageUrl
+            User user = new User(fname,lname,imageURL);
+            user.setAlias(alias);
+
+            System.out.println("RETREIVED USER: " + alias);
+
+            return new Pair<>(user, securePassword);
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -80,7 +84,7 @@ public class DynamoUserDAO extends Dynamo implements UserDAOInterface {
         try {
             System.out.println("Updating the item...");
             UpdateItemOutcome outcome = table.updateItem(updateItemSpec);
-            System.out.println("UpdateItem succeeded:\n" + outcome.getItem().toJSONPretty());
+            System.out.println("UpdateItem succeeded:\n" + outcome);
 
         }
         catch (Exception e) {
@@ -106,10 +110,4 @@ public class DynamoUserDAO extends Dynamo implements UserDAOInterface {
             throw new RuntimeException("[ServerError] - Unable to delete user " + alias);
         }
     }
-
-    @Override
-    public String getUsersSalt(){
-        return salt;
-    }
-
 }

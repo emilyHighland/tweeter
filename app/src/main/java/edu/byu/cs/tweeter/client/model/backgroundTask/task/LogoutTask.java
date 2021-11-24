@@ -21,7 +21,7 @@ public class LogoutTask extends AuthorizedTask {
     @Override
     protected void runTask() throws IOException {
         try {
-            LogoutRequest request = new LogoutRequest(authToken);
+            LogoutRequest request = new LogoutRequest(authToken.getToken());
             SimpleResponse response = SF.logout(request, "/logout");
         } catch (Exception e){
             e.printStackTrace();
