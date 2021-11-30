@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
         presenter.updateFollowingAndFollowersCount(selectedUser);
 
         TextView userName = findViewById(R.id.userName);
-        userName.setText(selectedUser.getAlias());
+        userName.setText(selectedUser.getName());
 
         TextView userAlias = findViewById(R.id.userAlias);
         userAlias.setText(selectedUser.getAlias());

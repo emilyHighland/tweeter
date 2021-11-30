@@ -29,13 +29,12 @@ public class FollowService {
 
     /** FOLLOWEES */
     public FollowingResponse getFollowees(FollowingRequest request) {
-        try {
-            // TODO: Generates dummy data. Replace with a real implementation.
-            assert request.getLimit() > 0;
-            assert request.getFollowerAlias() != null;
+//        try {
+
+        System.out.println("FOLLOWING REQUEST: " + request.toString());
 
             FollowsDAOInterface dao = this.factory.getFollowsDAO();
-            List<User> allFollowees = dao.getFollowees(request.getFollowerAlias());   // getDummyFollowees();
+            List<User> allFollowees = dao.getFollowees(request.getFollowerAlias(), request.getLimit(), request.getLastFolloweeAlias());   // getDummyFollowees();
             List<User> responseFollowees = new ArrayList<>(request.getLimit());
 
             boolean hasMorePages = false;
@@ -54,10 +53,10 @@ public class FollowService {
 
             return new FollowingResponse(responseFollowees, hasMorePages);
 
-        } catch (Exception e){
-            e.printStackTrace();
-            throw new RuntimeException("[BadRequest]");
-        }
+//        } catch (Exception e){
+//            e.printStackTrace();
+//            throw new RuntimeException("[BadRequest]");
+//        }
     }
 
     /**
@@ -91,13 +90,11 @@ public class FollowService {
 
     /** FOLLOWERS */
     public FollowersResponse getFollowers(FollowersRequest request){
-        try{
-            // TODO: Generates dummy data. Replace with a real implementation.
-            assert request.getLimit() > 0;
-            assert request.getFolloweeAlias() != null;
 
+        System.out.println("FOLLOWERS REQUEST: " + request.toString());
+//        try{
             FollowsDAOInterface dao = this.factory.getFollowsDAO();
-            List<User> allFollowers = dao.getFollowers(request.getFolloweeAlias()); // getDummyFollowees();
+            List<User> allFollowers = dao.getFollowers(request.getFolloweeAlias(), request.getLimit(), request.getLastFollowerAlias()); // getDummyFollowees();
             List<User> responseFollowers = new ArrayList<>(request.getLimit());
 
             boolean hasMorePages = false;
@@ -116,10 +113,10 @@ public class FollowService {
 
             return new FollowersResponse(responseFollowers, hasMorePages);
 
-        } catch (Exception e){
-            e.printStackTrace();
-            throw new RuntimeException("[BadRequest]");
-        }
+//        } catch (Exception e){
+//            e.printStackTrace();
+//            throw new RuntimeException("[BadRequest]");
+//        }
     }
 
     private int getFollowersStartingIndex(String lastFollowerAlias, List<User> allFollowers) {
@@ -185,13 +182,11 @@ public class FollowService {
      */
     public Integer getFolloweeCount(User follower) {
         // TODO: uses the dummy data.  Replace with a real implementation.
-        assert follower != null;
         return getDummyFollowees().size();
     }
 
     public Integer getFollowerCount(User followee) {
         // TODO: uses the dummy data.  Replace with a real implementation.
-        assert followee != null;
         // get count from follows table?
         return getDummyFollowers().size();
     }

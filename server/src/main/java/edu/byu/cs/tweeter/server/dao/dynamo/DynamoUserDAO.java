@@ -74,6 +74,7 @@ public class DynamoUserDAO extends Dynamo implements UserDAOInterface {
 
     @Override
     public void updateUser(String alias, String updateAttribute, String updatedValue) {
+
         Table table = getDB().getTable("users");
 
         UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey("alias", alias)

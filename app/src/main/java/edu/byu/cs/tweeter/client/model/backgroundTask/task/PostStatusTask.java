@@ -38,7 +38,8 @@ public class PostStatusTask extends AuthorizedTask {
     @Override
     protected void runTask() throws IOException {
         try {
-            PostStatusRequest request = new PostStatusRequest(post, authToken, alias);
+
+            PostStatusRequest request = new PostStatusRequest(getStatus(post), authToken, alias);
             SimpleResponse response = SF.postStatus(request, "/poststatus");
             // send message?
         } catch (Exception e){
@@ -52,13 +53,18 @@ public class PostStatusTask extends AuthorizedTask {
 
     }
 
-    private void getStatus(String post){
+    private Status getStatus(String post){
+        Status newStatus = null;
         try {
-            Status newStatus = new Status(post, Cache.getInstance().getCurrUser(), getFormattedDateTime(),
+            Cache.getInstance().getCurrUser().setImageBytes(null);
+            newStatus = new Status(post, Cache.getInstance().getCurrUser(), getFormattedDateTime(),
                     parseURLs(post), parseMentions(post));
+
         } catch (Exception ex){
+            ex.printStackTrace();
             sendExceptionMessage(ex);
         }
+        return newStatus;
     }
 
     public String getFormattedDateTime() throws ParseException {

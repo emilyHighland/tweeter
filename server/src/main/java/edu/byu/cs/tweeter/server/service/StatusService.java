@@ -31,11 +31,6 @@ public class StatusService {
         try {
             StoryDAOInterface sdao = this.factory.getStoryDAO();
 
-
-            // TODO: Generates dummy data. Replace with real implementation.
-            assert request.getLimit() > 0;
-            assert request.getTargetAlias() != null;
-
             List<Status> allStatuses = sdao.getStory(request.getTargetAlias()); //getDummyStatuses();
             List<Status> responseStory = new ArrayList<>(request.getLimit());
 
@@ -53,7 +48,6 @@ public class StatusService {
                 }
             }
             return new StoryResponse(responseStory, hasMorePages);
-
 
         } catch (Exception e){
             e.printStackTrace();
@@ -82,14 +76,11 @@ public class StatusService {
 
     /** FEED */
     public FeedResponse getFeed(FeedRequest request){
+
+        System.out.println("FEED REQUEST: " + request.toString());
         try {
-
-            // TODO: Generates dummy data. Replace with real implementation.
-            assert request.getLimit() > 0;
-            assert request.getTargetAlias() != null;
-
             FeedDAOInterface fdao = this.factory.getFeedDAO();
-            List<Status> allStatuses = fdao.getFeed(request.getTargetAlias());
+            List<Status> allStatuses = fdao.getFeed(request.getTargetAlias(), request.getLimit(), request.getLastStatus());
             List<Status> responseFeed = new ArrayList<>(request.getLimit());
 
             boolean hasMorePages = false;
@@ -135,10 +126,14 @@ public class StatusService {
     /** POST STATUS */
     public SimpleResponse postStatus(PostStatusRequest request){
         try {
-            assert request.getPost() != null;
-            assert request.getAlias() != null;
+            // add to story
             StoryDAOInterface sdao = this.factory.getStoryDAO();
-            sdao.postStatus(request.getAlias(), request.getPost());
+            sdao.postStatus(request.getAlias(), request.getStatus());
+
+            // add to feed
+            FeedDAOInterface fdao = this.factory.getFeedDAO();
+            fdao.addFeed(request.getAlias(), request.getStatus());
+
 
             return new SimpleResponse();
 
@@ -152,11 +147,11 @@ public class StatusService {
 
 
 
-    List<Status> getDummyStatuses(){
-        return getFakeData().getFakeStatuses();
-    }
-
-    FakeData getFakeData() {
-        return new FakeData();
-    }
+//    List<Status> getDummyStatuses(){
+//        return getFakeData().getFakeStatuses();
+//    }
+//
+//    FakeData getFakeData() {
+//        return new FakeData();
+//    }
 }
