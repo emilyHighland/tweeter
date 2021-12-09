@@ -9,8 +9,8 @@ class Response implements Serializable {
 
     public Response(){}
 
-    private boolean success;
-    private String message;
+    protected boolean success;
+    protected String message;
 
     /**
      * Creates an instance with a null message.
@@ -32,21 +32,19 @@ class Response implements Serializable {
         this.message = message;
     }
 
-    /**
-     * Indicates whether the response represents a successful result.
-     *
-     * @return the success indicator.
-     */
     public boolean isSuccess() {
         return success;
     }
 
-    /**
-     * The error message for unsuccessful results.
-     *
-     * @return an error message or null if the response indicates a successful result.
-     */
+    public void setSuccess(boolean success) {
+        this.success = success;
+    }
+
     public String getMessage() {
         return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

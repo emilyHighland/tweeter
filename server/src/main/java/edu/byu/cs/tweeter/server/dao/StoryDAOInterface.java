@@ -5,6 +5,6 @@ import edu.byu.cs.tweeter.model.domain.Status;
 import java.util.List;
 
 public interface StoryDAOInterface {
-    List<Status> getStory(String alias);
-    void postStatus(String alias, Status status);
+    void addStatus(String alias, Status status, long UNIXmillis);
+    List<Status> getStory(String alias, int limit, Status lastStatus, long lastTimestamp);
 }

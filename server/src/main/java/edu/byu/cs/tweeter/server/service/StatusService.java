@@ -2,18 +2,24 @@ package edu.byu.cs.tweeter.server.service;
 
 import com.google.inject.Inject;
 import edu.byu.cs.tweeter.model.domain.Status;
+import edu.byu.cs.tweeter.model.net.JsonSerializer;
 import edu.byu.cs.tweeter.model.net.request.FeedRequest;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
 import edu.byu.cs.tweeter.model.net.request.StoryRequest;
 import edu.byu.cs.tweeter.model.net.response.FeedResponse;
+import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
 import edu.byu.cs.tweeter.model.net.response.StoryResponse;
+import edu.byu.cs.tweeter.server.dao.AuthTokenDAOInterface;
 import edu.byu.cs.tweeter.server.dao.FeedDAOInterface;
+import edu.byu.cs.tweeter.server.dao.FollowsDAOInterface;
 import edu.byu.cs.tweeter.server.dao.StoryDAOInterface;
 import edu.byu.cs.tweeter.server.dao.factories.DAOFactoryInterface;
-import edu.byu.cs.tweeter.server.util.FakeData;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 public class StatusService {
@@ -27,12 +33,19 @@ public class StatusService {
 
 
     /** STORY */
-    public StoryResponse getStory(StoryRequest request){
-        try {
-            StoryDAOInterface sdao = this.factory.getStoryDAO();
+    public StoryResponse getStory(StoryRequest request) {
 
-            List<Status> allStatuses = sdao.getStory(request.getTargetAlias()); //getDummyStatuses();
-            List<Status> responseStory = new ArrayList<>(request.getLimit());
+        // check authorization
+        AuthTokenDAOInterface adao = this.factory.getAuthTokenDAO();
+        String dbAuthToken = adao.getAuthToken(request.getAuthToken().getToken());
+        if (!request.getAuthToken().getToken().equals(dbAuthToken))
+            throw new RuntimeException("[AuthError] unauthenticated request");
+
+        try {
+            long lastTimestamp = statusDateToUnix(request.getLastStatus());
+            StoryDAOInterface sdao = this.factory.getStoryDAO();
+            List<Status> allStatuses = sdao.getStory(request.getTargetAlias(), request.getLimit(), request.getLastStatus(), lastTimestamp);
+            List<Status> responseStory = new ArrayList<>();
 
             boolean hasMorePages = false;
 
@@ -40,7 +53,7 @@ public class StatusService {
                 if (allStatuses != null) {
                     int statusIndex = getStoryStartingIndex(request.getLastStatus(), allStatuses);
 
-                    for (int limitCounter = 0; statusIndex < allStatuses.size() && limitCounter < request.getLimit(); statusIndex++,limitCounter++){
+                    for (int limitCounter = 0; statusIndex < allStatuses.size() && limitCounter < request.getLimit(); statusIndex++, limitCounter++) {
                         responseStory.add(allStatuses.get(statusIndex));
                     }
 
@@ -51,7 +64,7 @@ public class StatusService {
 
         } catch (Exception e){
             e.printStackTrace();
-            throw new RuntimeException("[BadRequest]");
+            throw new RuntimeException(String.format("[BadRequest] - unable to get %s's story " + e.getMessage(), request.getTargetAlias()));
         }
     }
 
@@ -73,15 +86,46 @@ public class StatusService {
         return statusIndex;
     }
 
+    private long statusDateToUnix(Status lastStatus) {
+        if (lastStatus != null) {
+
+            try {
+                String date = lastStatus.getDate();
+
+                System.out.println("lastStatus date: " + date);
+//
+//        SimpleDateFormat userFormat = new SimpleDateFormat("yyyy-MM-dd hh:mm:ss");
+//        SimpleDateFormat statusFormat = new SimpleDateFormat("MMM d yyyy h:mm aaa");
+
+                Date tempDate = new SimpleDateFormat("MMM d yyyy h:mm aaa").parse(date);
+                long lastStatusTimestamp = tempDate.getTime();
+
+                System.out.println("lastTimestamp: " + lastStatusTimestamp);
+
+                return lastStatusTimestamp;
+            } catch (ParseException e){
+                e.printStackTrace();
+                throw new RuntimeException("[BadRequest] - unable to parse last status date");
+            }
+        }
+        return 0;
+    }
+
 
     /** FEED */
     public FeedResponse getFeed(FeedRequest request){
 
-        System.out.println("FEED REQUEST: " + request.toString());
+        // check authorization
+        AuthTokenDAOInterface adao = this.factory.getAuthTokenDAO();
+        String dbAuthToken = adao.getAuthToken(request.getAuthToken().getToken());
+        if (!request.getAuthToken().getToken().equals(dbAuthToken))
+            throw new RuntimeException("[AuthError] unauthenticated request");
+
         try {
+            long lastTimestamp = statusDateToUnix(request.getLastStatus());
             FeedDAOInterface fdao = this.factory.getFeedDAO();
-            List<Status> allStatuses = fdao.getFeed(request.getTargetAlias(), request.getLimit(), request.getLastStatus());
-            List<Status> responseFeed = new ArrayList<>(request.getLimit());
+            List<Status> allStatuses = fdao.getFeed(request.getTargetAlias(), request.getLimit(), request.getLastStatus(), lastTimestamp);
+            List<Status> responseFeed = new ArrayList<>();
 
             boolean hasMorePages = false;
 
@@ -89,7 +133,7 @@ public class StatusService {
                 if (allStatuses != null) {
                     int statusIndex = getFeedStartingIndex(request.getLastStatus(), allStatuses);
 
-                    for (int limitCounter = 0; statusIndex < allStatuses.size() && limitCounter < request.getLimit(); statusIndex++,limitCounter++){
+                    for (int limitCounter = 0; statusIndex < allStatuses.size() && limitCounter < request.getLimit(); statusIndex++, limitCounter++) {
                         responseFeed.add(allStatuses.get(statusIndex));
                     }
 
@@ -100,7 +144,7 @@ public class StatusService {
 
         } catch (Exception e){
             e.printStackTrace();
-            throw new RuntimeException("[BadRequest]");
+            throw new RuntimeException("[BadRequest] - unable to get feed " + e.getMessage());
         }
     }
 
@@ -124,34 +168,37 @@ public class StatusService {
 
 
     /** POST STATUS */
-    public SimpleResponse postStatus(PostStatusRequest request){
+    public PostStatusResponse postStatus(PostStatusRequest request, long newTimestamp){
+
+        // check authorization
+//        AuthTokenDAOInterface adao = this.factory.getAuthTokenDAO();
+//        String dbAuthToken = adao.getAuthToken(request.getAuthToken().getToken());
+//        if (!request.getAuthToken().getToken().equals(dbAuthToken))
+//            throw new RuntimeException("[AuthError] unauthenticated request");
+
         try {
             // add to story
             StoryDAOInterface sdao = this.factory.getStoryDAO();
-            sdao.postStatus(request.getAlias(), request.getStatus());
+            sdao.addStatus(request.getAlias(), request.getStatus(), newTimestamp);
 
-            // add to feed
-            FeedDAOInterface fdao = this.factory.getFeedDAO();
-            fdao.addFeed(request.getAlias(), request.getStatus());
+            System.out.println("ADDED POST TO STORY");
 
-
-            return new SimpleResponse();
+            return new PostStatusResponse(true);
 
         } catch (Exception e){
             e.printStackTrace();
-            throw new RuntimeException("[BadRequest]");
+            throw new RuntimeException("[BadRequest] - unable to post status " + e.getMessage());
         }
     }
 
-
-
-
-
-//    List<Status> getDummyStatuses(){
-//        return getFakeData().getFakeStatuses();
-//    }
-//
-//    FakeData getFakeData() {
-//        return new FakeData();
-//    }
+    public void feedBatchWrite(List<String> followers, Status status, long UNIXmillis){
+        try {
+            FeedDAOInterface fdao = this.factory.getFeedDAO();
+            fdao.feedBatchWrite(followers, JsonSerializer.serialize(status), UNIXmillis);
+            System.out.println("ADDED FEED BATCH");
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest] - unable to batch write status to followers feeds " + e.getMessage());
+        }
+    }
 }

@@ -47,7 +47,7 @@ public class StatusService {
     public interface FeedObserver extends PagedObserver<Status> { }
 
     public void getFeed(User targetUser, int PAGE_SIZE, Status lastStatus,
-                               StatusService.FeedObserver observer){
+                               FeedObserver observer){
         GetFeedTask getFeedTask = new GetFeedTask(Cache.getInstance().getCurrUserAuthToken(),
                 targetUser, PAGE_SIZE, lastStatus, new GetFeedHandler(observer));
         service.runTask(getFeedTask);

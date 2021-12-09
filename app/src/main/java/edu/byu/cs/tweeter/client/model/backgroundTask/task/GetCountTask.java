@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 
 import java.io.IOException;
 
@@ -28,11 +29,11 @@ public abstract class GetCountTask extends AuthorizedTask {
     }
 
     @Override
-    protected void runTask() throws IOException {
+    protected void runTask() throws IOException, TweeterRemoteException {
         count = runCountTask();
     }
 
-    protected abstract int runCountTask();
+    protected abstract int runCountTask() throws IOException, TweeterRemoteException;
 
     @Override
     protected void loadMessageBundle(Bundle msgBundle) {

@@ -15,6 +15,7 @@ import androidx.viewpager.widget.ViewPager;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.tabs.TabLayout;
 import edu.byu.cs.client.R;
+import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.client.presenter.MainPresenter;
 import edu.byu.cs.tweeter.client.view.login.LoginActivity;
 import edu.byu.cs.tweeter.client.view.login.StatusDialogFragment;
@@ -86,6 +87,11 @@ public class MainActivity extends AppCompatActivity implements StatusDialogFragm
 
 
         presenter = new MainPresenter(this);
+
+
+        System.out.println("SELECTED USER: " + selectedUser.getAlias());
+        System.out.println("CURRENT USER: " + Cache.getInstance().getCurrUser().getAlias());
+
 
         presenter.isFollower(selectedUser);
 

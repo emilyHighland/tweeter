@@ -5,13 +5,18 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 
 public abstract class AuthorizedTask extends BackgroundTask {
 
-    /**
-     * Auth token for logged-in user.
-     */
     protected AuthToken authToken;
 
     public AuthorizedTask(Handler messageHandler, AuthToken authToken) {
         super(messageHandler);
+        this.authToken = authToken;
+    }
+
+    public AuthToken getAuthToken() {
+        return authToken;
+    }
+
+    public void setAuthToken(AuthToken authToken) {
         this.authToken = authToken;
     }
 }

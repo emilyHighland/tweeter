@@ -5,12 +5,15 @@ import edu.byu.cs.tweeter.model.domain.User;
 import edu.byu.cs.tweeter.model.net.request.FollowersRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 import edu.byu.cs.tweeter.model.net.request.FollowsRequest;
+import edu.byu.cs.tweeter.model.net.request.IsFollowerRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowersResponse;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
+import edu.byu.cs.tweeter.model.net.response.IsFollowerResponse;
 import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
+import edu.byu.cs.tweeter.server.dao.AuthTokenDAOInterface;
 import edu.byu.cs.tweeter.server.dao.FollowsDAOInterface;
+import edu.byu.cs.tweeter.server.dao.UserDAOInterface;
 import edu.byu.cs.tweeter.server.dao.factories.DAOFactoryInterface;
-import edu.byu.cs.tweeter.server.util.FakeData;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,36 +30,39 @@ public class FollowService {
         this.factory = factory;
     }
 
-    /** FOLLOWEES */
+    /** FOLLOWING */
     public FollowingResponse getFollowees(FollowingRequest request) {
-//        try {
 
-        System.out.println("FOLLOWING REQUEST: " + request.toString());
+        // check authorization
+        AuthTokenDAOInterface adao = this.factory.getAuthTokenDAO();
+        String dbAuthToken = adao.getAuthToken(request.getAuthToken().getToken());
+        if (!request.getAuthToken().getToken().equals(dbAuthToken))
+            throw new RuntimeException("[AuthError] unauthenticated request");
 
+        try {
             FollowsDAOInterface dao = this.factory.getFollowsDAO();
-            List<User> allFollowees = dao.getFollowees(request.getFollowerAlias(), request.getLimit(), request.getLastFolloweeAlias());   // getDummyFollowees();
+            List<User> allFollowees = dao.getFollowees(request.getFollowerAlias(), request.getLimit(), request.getLastFolloweeAlias());
             List<User> responseFollowees = new ArrayList<>(request.getLimit());
 
             boolean hasMorePages = false;
 
-            if(request.getLimit() > 0) {
+            if (request.getLimit() > 0) {
                 if (allFollowees != null) {
                     int followeesIndex = getFolloweesStartingIndex(request.getLastFolloweeAlias(), allFollowees);
 
-                    for(int limitCounter = 0; followeesIndex < allFollowees.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
+                    for (int limitCounter = 0; followeesIndex < allFollowees.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
                         responseFollowees.add(allFollowees.get(followeesIndex));
                     }
 
                     hasMorePages = followeesIndex < allFollowees.size();
                 }
             }
-
             return new FollowingResponse(responseFollowees, hasMorePages);
 
-//        } catch (Exception e){
-//            e.printStackTrace();
-//            throw new RuntimeException("[BadRequest]");
-//        }
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest] - unable to get following " + e.getMessage());
+        }
     }
 
     /**
@@ -91,32 +97,36 @@ public class FollowService {
     /** FOLLOWERS */
     public FollowersResponse getFollowers(FollowersRequest request){
 
-        System.out.println("FOLLOWERS REQUEST: " + request.toString());
-//        try{
+        // check authorization
+        AuthTokenDAOInterface adao = this.factory.getAuthTokenDAO();
+        String dbAuthToken = adao.getAuthToken(request.getAuthToken().getToken());
+        if (!request.getAuthToken().getToken().equals(dbAuthToken))
+            throw new RuntimeException("[AuthError] unauthenticated request");
+
+        try {
             FollowsDAOInterface dao = this.factory.getFollowsDAO();
-            List<User> allFollowers = dao.getFollowers(request.getFolloweeAlias(), request.getLimit(), request.getLastFollowerAlias()); // getDummyFollowees();
+            List<User> allFollowers = dao.getFollowers(request.getFolloweeAlias(), request.getLimit(), request.getLastFollowerAlias());
             List<User> responseFollowers = new ArrayList<>(request.getLimit());
 
             boolean hasMorePages = false;
 
-            if(request.getLimit() > 0) {
+            if (request.getLimit() > 0) {
                 if (allFollowers != null) {
                     int followeesIndex = getFollowersStartingIndex(request.getLastFollowerAlias(), allFollowers);
 
-                    for(int limitCounter = 0; followeesIndex < allFollowers.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
+                    for (int limitCounter = 0; followeesIndex < allFollowers.size() && limitCounter < request.getLimit(); followeesIndex++, limitCounter++) {
                         responseFollowers.add(allFollowers.get(followeesIndex));
                     }
 
                     hasMorePages = followeesIndex < allFollowers.size();
                 }
             }
-
             return new FollowersResponse(responseFollowers, hasMorePages);
 
-//        } catch (Exception e){
-//            e.printStackTrace();
-//            throw new RuntimeException("[BadRequest]");
-//        }
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest] - unable to get followers " + e.getMessage());
+        }
     }
 
     private int getFollowersStartingIndex(String lastFollowerAlias, List<User> allFollowers) {
@@ -137,84 +147,102 @@ public class FollowService {
     }
 
 
-    /** FOLLOW & UNFOLLOW */
+    /** FOLLOW */
     public SimpleResponse follow(FollowsRequest request){
+
+        // check authorization
+        AuthTokenDAOInterface adao = this.factory.getAuthTokenDAO();
+        String dbAuthToken = adao.getAuthToken(request.getAuthToken().getToken());
+        if (!request.getAuthToken().getToken().equals(dbAuthToken))
+            throw new RuntimeException("[AuthError] unauthenticated request");
+
         try {
-            FollowsDAOInterface dao = this.factory.getFollowsDAO();
-            // check if authToken is valid
-            request.getAuthToken();
-            // check if already following??
+            FollowsDAOInterface fdao = this.factory.getFollowsDAO();
+            // already following?
+            if (fdao.find(request.getFollowerAlias(), request.getFolloweeAlias())) {
+                throw new RuntimeException("already following");
+            }
 
+            // add follows
+            fdao.add(request.getFolloweeAlias(), request.getFollowerAlias(), request.getFolloweeName(), request.getFollowerName(),
+                    request.getFolloweeImage(), request.getFollowerImage());
 
-            dao.follow(request.getUserAlias());
+            // update counts:
+            //  ++ the followee's followers count
+            UserDAOInterface udao = this.factory.getUserDAO();
+            int followerCount = udao.getFollowerCount(request.getFolloweeAlias());
+            udao.updateUser(request.getFolloweeAlias(),"follower_count", followerCount+1);
+            //  ++ currentUser's following count
+            int followingCount = udao.getFollowingCount(request.getFollowerAlias());
+            udao.updateUser(request.getFollowerAlias(),"followee_count", followingCount+1);
 
             return new SimpleResponse();
+
         } catch (Exception e){
             e.printStackTrace();
-            throw new RuntimeException("[BadRequest]");
+            throw new RuntimeException("[BadRequest] - unable to follow " + request.getFolloweeAlias() + " " + e.getMessage());
         }
     }
 
+    /** UNFOLLOW */
     public SimpleResponse unfollow(FollowsRequest request){
-        try {
-            FollowsDAOInterface dao = this.factory.getFollowsDAO();
-            // check if authToken is valid
-            request.getAuthToken();
-            // check if already following??
 
-            dao.unfollow(request.getUserAlias());
+        // check authorization
+        AuthTokenDAOInterface adao = this.factory.getAuthTokenDAO();
+        String dbAuthToken = adao.getAuthToken(request.getAuthToken().getToken());
+        if (!request.getAuthToken().getToken().equals(dbAuthToken))
+            throw new RuntimeException("[AuthError] unauthenticated request");
+
+        try {
+            FollowsDAOInterface fdao = this.factory.getFollowsDAO();
+            // not following?
+            if (!fdao.find(request.getFollowerAlias(), request.getFolloweeAlias())) {
+                throw new RuntimeException("can't unfollow when not following");
+            }
+
+            // update counts:
+            //  -- the followee's followers count
+            UserDAOInterface udao = this.factory.getUserDAO();
+            int followerCount = udao.getFollowerCount(request.getFolloweeAlias());
+            udao.updateUser(request.getFolloweeAlias(),"follower_count", followerCount-1);
+            //  -- currentUser's following count
+            int followingCount = udao.getFollowingCount(request.getFollowerAlias());
+            udao.updateUser(request.getFollowerAlias(),"followee_count", followingCount-1);
+
+            // delete follows relationship
+            fdao.delete(request.getFollowerAlias(),request.getFolloweeAlias());
 
             return new SimpleResponse();
+
         } catch (Exception e){
             e.printStackTrace();
-            throw new RuntimeException("[BadRequest]");
+            throw new RuntimeException("[BadRequest] - unable to unfollow " + request.getFolloweeAlias() + " " + e.getMessage());
         }
     }
 
-
-    /** COUNTS */
-    /**
-     * Gets the count of users from the database that the user specified is following. The
-     * current implementation uses generated data and doesn't actually access a database.
-     *
-     * @param follower the User whose count of how many following is desired.
-     * @return said count.
-     */
-    public Integer getFolloweeCount(User follower) {
-        // TODO: uses the dummy data.  Replace with a real implementation.
-        return getDummyFollowees().size();
+    /** IS FOLLOWER */
+    public IsFollowerResponse isFollower(IsFollowerRequest isFollowerRequest){
+        try {
+            FollowsDAOInterface fdao = this.factory.getFollowsDAO();
+            if (fdao.find(isFollowerRequest.getFollowerAlias(), isFollowerRequest.getFolloweeAlias())) {
+                return new IsFollowerResponse(true, true);
+            } else {
+                return new IsFollowerResponse(true, false);
+            }
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest] - unable to determine follow relationship " + e.getMessage());
+        }
     }
 
-    public Integer getFollowerCount(User followee) {
-        // TODO: uses the dummy data.  Replace with a real implementation.
-        // get count from follows table?
-        return getDummyFollowers().size();
+    public List<String> getFollowersBatches(String alias){
+        try {
+            // get list of follower aliases
+            FollowsDAOInterface followsdao = this.factory.getFollowsDAO();
+            return followsdao.getAllFollowerAliases(alias);
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest] - unable to get batch of followers " + e.getMessage());
+        }
     }
-
-
-
-    /**
-     * Returns the list of dummy followee data. This is written as a separate method to allow
-     * mocking of the followees.
-     *
-     * @return the followees.
-     */
-    List<User> getDummyFollowees() {
-        return getFakeData().getFakeUsers();
-    }
-
-    List<User> getDummyFollowers() {
-        return getFakeData().getFakeUsers();
-    }
-
-    /**
-     * Returns the {@link FakeData} object used to generate dummy followees.
-     * This is written as a separate method to allow mocking of the {@link FakeData}.
-     *
-     * @return a {@link FakeData} instance.
-     */
-    FakeData getFakeData() {
-        return new FakeData();
-    }
-
 }

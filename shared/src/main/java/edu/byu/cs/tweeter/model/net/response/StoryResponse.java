@@ -9,10 +9,14 @@ public class StoryResponse extends PagedResponse{
 
     private List<Status> statuses;
 
-    public StoryResponse(){}
+    private StoryResponse(){}
 
     public StoryResponse(String message){
         super(false, message, false);
+    }
+
+    public StoryResponse(boolean success, boolean hasMorePages){
+        super(success,hasMorePages);
     }
 
     public StoryResponse(List<Status> statuses, boolean hasMorePages){

@@ -1,5 +1,6 @@
 package edu.byu.cs.tweeter.client.model.net;
 
+import edu.byu.cs.tweeter.model.net.JsonSerializer;
 import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 
 import java.io.*;

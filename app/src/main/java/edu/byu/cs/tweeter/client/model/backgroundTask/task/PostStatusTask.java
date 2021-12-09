@@ -5,7 +5,9 @@ import android.os.Handler;
 import edu.byu.cs.tweeter.client.cache.Cache;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.PostStatusRequest;
+import edu.byu.cs.tweeter.model.net.response.PostStatusResponse;
 import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
 
 import java.io.IOException;
@@ -21,6 +23,7 @@ import java.util.List;
  */
 public class PostStatusTask extends AuthorizedTask {
     private static final String LOG_TAG = "PostStatusTask";
+    public static final String POST_STATUS_KEY = "post-status";
 
     /**
      * The new status being sent. Contains all properties of the status,
@@ -36,21 +39,15 @@ public class PostStatusTask extends AuthorizedTask {
     }
 
     @Override
-    protected void runTask() throws IOException {
-        try {
+    protected void runTask() throws IOException, TweeterRemoteException {
 
-            PostStatusRequest request = new PostStatusRequest(getStatus(post), authToken, alias);
-            SimpleResponse response = SF.postStatus(request, "/poststatus");
-            // send message?
-        } catch (Exception e){
-            e.printStackTrace();
-            sendExceptionMessage(e);
-        }
+        PostStatusRequest request = new PostStatusRequest(getStatus(post), authToken, alias);
+        PostStatusResponse response = SF.postStatus(request, "/poststatus");
+
     }
 
     @Override
     protected void loadMessageBundle(Bundle msgBundle) {
-
     }
 
     private Status getStatus(String post){

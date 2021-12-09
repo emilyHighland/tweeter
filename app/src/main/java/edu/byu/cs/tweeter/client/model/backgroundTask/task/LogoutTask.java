@@ -3,6 +3,7 @@ package edu.byu.cs.tweeter.client.model.backgroundTask.task;
 import android.os.Bundle;
 import android.os.Handler;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
 import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
 
@@ -19,14 +20,10 @@ public class LogoutTask extends AuthorizedTask {
     }
 
     @Override
-    protected void runTask() throws IOException {
-        try {
-            LogoutRequest request = new LogoutRequest(authToken.getToken());
-            SimpleResponse response = SF.logout(request, "/logout");
-        } catch (Exception e){
-            e.printStackTrace();
-            sendExceptionMessage(e);
-        }
+    protected void runTask() throws IOException, TweeterRemoteException {
+        LogoutRequest request = new LogoutRequest(authToken.getToken());
+        SimpleResponse response = SF.logout(request, "/logout");
+
     }
 
     @Override

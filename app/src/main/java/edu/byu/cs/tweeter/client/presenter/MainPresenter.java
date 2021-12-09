@@ -24,6 +24,10 @@ public class MainPresenter extends Presenter{
         void logoutUser();
     }
 
+    private MainView getView() {
+        return view;
+    }
+
     private final MainView view;
 
     private UserService userService;
@@ -35,28 +39,8 @@ public class MainPresenter extends Presenter{
         this.view = view;
     }
 
-    public UserService getUserService() {
-        if (userService == null){
-            userService = new UserService();
-        }
-        return userService;
-    }
-
-    public StatusService getStatusService() {
-        if (statusService == null){
-            statusService = new StatusService();
-        }
-        return statusService;
-    }
-
-    public FollowService getFollowService() {
-        if (followService == null){
-            followService = new FollowService();
-        }
-        return followService;
-    }
-
     public void isFollower(User selectedUser){
+        // don't load follow button on self
         if (selectedUser.compareTo(Cache.getInstance().getCurrUser()) == 0) {
             view.setVisibility(false);
         } else {
@@ -65,7 +49,7 @@ public class MainPresenter extends Presenter{
                     new IsFollowerObserver() {
                 @Override
                 public void handleSuccess(boolean isFollower) {
-                    view.setIsFollower(isFollower);
+                    getView().setIsFollower(isFollower);
                 }
 
                 @Override
@@ -181,4 +165,27 @@ public class MainPresenter extends Presenter{
             }
         });
     }
+
+    public UserService getUserService() {
+        if (userService == null){
+            userService = new UserService();
+        }
+        return userService;
+    }
+
+    public StatusService getStatusService() {
+        if (statusService == null){
+            statusService = new StatusService();
+        }
+        return statusService;
+    }
+
+    public FollowService getFollowService() {
+        if (followService == null){
+            followService = new FollowService();
+        }
+        return followService;
+    }
+
+
 }

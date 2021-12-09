@@ -117,15 +117,16 @@ public class ServerFacade {
     }
 
 
-    public SimpleResponse postStatus(PostStatusRequest request, String urlPath)
+    public PostStatusResponse postStatus(PostStatusRequest request, String urlPath)
             throws IOException, TweeterRemoteException {
-        SimpleResponse response = clientCommunicator.doPost(urlPath, request, null, SimpleResponse.class);
+        PostStatusResponse response = clientCommunicator.doPost(urlPath, request, null, PostStatusResponse.class);
+        return response;
+    }
 
-        if(response.isSuccess()) {
-            return response;
-        } else {
-            throw new RuntimeException(response.getMessage());
-        }
+    public IsFollowerResponse isFollower(IsFollowerRequest request, String urlPath)
+            throws IOException, TweeterRemoteException {
+        IsFollowerResponse response = clientCommunicator.doPost(urlPath, request, null, IsFollowerResponse.class);
+        return response;
     }
 
 
@@ -149,6 +150,20 @@ public class ServerFacade {
         } else {
             throw new RuntimeException(response.getMessage());
         }
+    }
+
+    public FollowingCountResponse getFollowingCount(FollowingCountRequest request, String urlPath)
+            throws IOException, TweeterRemoteException {
+        FollowingCountResponse response = clientCommunicator.doPost(urlPath, request, null, FollowingCountResponse.class);
+
+        return response;
+    }
+
+    public FollowerCountResponse getFollowerCount(FollowerCountRequest request, String urlPath)
+        throws IOException, TweeterRemoteException {
+        FollowerCountResponse response = clientCommunicator.doPost(urlPath, request, null, FollowerCountResponse.class);
+
+        return response;
     }
 
 

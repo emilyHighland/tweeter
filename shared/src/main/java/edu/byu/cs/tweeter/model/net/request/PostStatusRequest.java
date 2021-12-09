@@ -5,9 +5,9 @@ import edu.byu.cs.tweeter.model.domain.Status;
 
 public class PostStatusRequest {
 
-    Status status;
-    AuthToken authToken;
-    String alias;
+    private Status status;
+    private AuthToken authToken;
+    private String alias;
 
     private PostStatusRequest(){}
 
@@ -40,4 +40,5 @@ public class PostStatusRequest {
     public void setAlias(String alias) {
         this.alias = alias;
     }
+
 }

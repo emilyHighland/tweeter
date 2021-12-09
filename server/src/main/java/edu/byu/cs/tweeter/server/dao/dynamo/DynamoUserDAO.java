@@ -1,15 +1,17 @@
 package edu.byu.cs.tweeter.server.dao.dynamo;
 
 import com.amazonaws.services.dynamodbv2.document.*;
-import com.amazonaws.services.dynamodbv2.document.spec.DeleteItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.GetItemSpec;
 import com.amazonaws.services.dynamodbv2.document.spec.UpdateItemSpec;
 import com.amazonaws.services.dynamodbv2.document.utils.ValueMap;
 import com.amazonaws.services.dynamodbv2.model.ReturnValue;
 import com.google.inject.Inject;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.server.sqs.DTO.UserDTO;
 import edu.byu.cs.tweeter.server.dao.UserDAOInterface;
 import edu.byu.cs.tweeter.server.util.Pair;
+
+import java.util.List;
 
 public class DynamoUserDAO extends Dynamo implements UserDAOInterface {
 
@@ -21,7 +23,7 @@ public class DynamoUserDAO extends Dynamo implements UserDAOInterface {
                         String hashedPassword, int followerCount, int followeeCount) {
         try {
             Table table = getDB().getTable("users");
-            System.out.println("Adding a new item...");
+            System.out.println("Adding a new user...");
             PutItemOutcome outcome = table
                     .putItem(new Item().withPrimaryKey("alias", alias)
                             .withString("first_name", firstName)
@@ -30,85 +32,99 @@ public class DynamoUserDAO extends Dynamo implements UserDAOInterface {
                             .withString("password", hashedPassword)
                             .withNumber("follower_count", followerCount)
                             .withNumber("followee_count", followeeCount));
-
-            System.out.println("GetItem succeeded: " + outcome);
+            System.out.println("GetItem succeeded");
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("[ServerError] - Unable to add user: " + alias);
+            throw new RuntimeException("[ServerError] - unable to add user " + e.getMessage());
         }
     }
 
     @Override
     public Pair<User,String> getUserByID(String alias) {
-        Table table = getDB().getTable("users");
-
-        GetItemSpec spec = new GetItemSpec().withPrimaryKey("alias", alias);
-
         try {
-            System.out.println("Attempting to read the item...");
+            Table table = getDB().getTable("users");
+
+            GetItemSpec spec = new GetItemSpec().withPrimaryKey("alias", alias);
+
+            System.out.println("Attempting to get user...");
             Item outcome = table.getItem(spec);
             System.out.println("GetItem succeeded: " + outcome.toJSONPretty());
-
-            String securePassword = (String) outcome.get("password");
-
-            System.out.println("PRINTING PASSWORD: " + securePassword);
 
             String fname = (String) outcome.get("first_name");
             String lname = (String) outcome.get("last_name");
             String imageURL = (String) outcome.get("image_url");
+            String securePassword = (String) outcome.get("password");
 
-            // firstName, lastName, imageUrl
             User user = new User(fname,lname,imageURL);
             user.setAlias(alias);
 
-            System.out.println("RETREIVED USER: " + alias);
+            System.out.println("RETREIVED USER");
 
             return new Pair<>(user, securePassword);
 
         } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("[ServerError] - Unable to get user: " + alias);
+            throw new RuntimeException("[ServerError] - unable to get user " + e.getMessage());
         }
     }
 
     @Override
-    public void updateUser(String alias, String updateAttribute, String updatedValue) {
-
-        Table table = getDB().getTable("users");
-
-        UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey("alias", alias)
-                .withUpdateExpression("set " + updateAttribute + " = :ex")
-                .withValueMap(new ValueMap().withString(":ex", updatedValue))
-                .withReturnValues(ReturnValue.UPDATED_NEW);
-
+    public void updateUser(String alias, String updateAttribute, int updatedValue) {
         try {
-            System.out.println("Updating the item...");
+            Table table = getDB().getTable("users");
+
+            UpdateItemSpec updateItemSpec = new UpdateItemSpec().withPrimaryKey("alias", alias)
+                    .withUpdateExpression("set " + updateAttribute + " = :ex")
+                    .withValueMap(new ValueMap().with(":ex", updatedValue))
+                    .withReturnValues(ReturnValue.UPDATED_NEW);
+
+            System.out.println("Updating user...");
             UpdateItemOutcome outcome = table.updateItem(updateItemSpec);
-            System.out.println("UpdateItem succeeded:\n" + outcome);
-
+            System.out.println("UpdateItem succeeded");
         }
         catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("[ServerError] - Unable to update user: " + alias);
-
+            throw new RuntimeException("[ServerError] - unable to update user " + e.getMessage());
         }
     }
 
     @Override
-    public void deleteUser(String alias) {
-        Table table = getDB().getTable("users");
-
-        DeleteItemSpec deleteItemSpec = new DeleteItemSpec()
-                .withPrimaryKey(new PrimaryKey("alias", alias));
+    public int getFollowingCount(String alias) {
         try {
-            System.out.println("Attempting a delete...");
-            table.deleteItem(deleteItemSpec);
-            System.out.println("DeleteItem succeeded");
-        }
-        catch (Exception e) {
+            Table table = getDB().getTable("users");
+
+            GetItemSpec spec = new GetItemSpec().withPrimaryKey("alias", alias);
+
+            System.out.println("Attempting to get following count...");
+            Item outcome = table.getItem(spec);
+            System.out.println("GetItem succeeded");
+
+            return ((java.math.BigDecimal) outcome.get("followee_count")).intValue();
+
+        } catch (Exception e) {
             e.printStackTrace();
-            throw new RuntimeException("[ServerError] - Unable to delete user " + alias);
+            throw new RuntimeException("[ServerError] - unable to get following count " + e.getMessage());
         }
     }
+
+    @Override
+    public int getFollowerCount(String alias) {
+        try {
+            Table table = getDB().getTable("users");
+
+            GetItemSpec spec = new GetItemSpec().withPrimaryKey("alias", alias);
+
+            System.out.println("Attempting to get follower count...");
+            Item outcome = table.getItem(spec);
+            System.out.println("GetItem succeeded");
+
+            return ((java.math.BigDecimal) outcome.get("follower_count")).intValue();
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new RuntimeException("[ServerError] - unable to get follower count " + e.getMessage());
+        }
+    }
+
 }

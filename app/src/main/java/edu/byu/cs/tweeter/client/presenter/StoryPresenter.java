@@ -6,9 +6,11 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class StoryPresenter extends PagedPresenter<Status> {
 
+    public interface StoryView extends PagedView<Status>{}
+
     private final StatusService statusService;
 
-    public StoryPresenter(PagedView<Status> view, User targetUser){
+    public StoryPresenter(StoryView view, User targetUser){
         super(view, targetUser);
         statusService = new StatusService();
     }
@@ -20,7 +22,7 @@ public class StoryPresenter extends PagedPresenter<Status> {
 
     @Override
     protected String getDescription() {
-        return null;
+        return "get story";
     }
 
     private class GetStoryObserver extends GetItemsObserver implements StatusService.StoryObserver {}

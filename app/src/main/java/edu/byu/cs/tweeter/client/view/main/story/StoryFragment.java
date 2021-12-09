@@ -11,6 +11,7 @@ import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.text.style.URLSpan;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,19 +30,23 @@ import edu.byu.cs.tweeter.client.view.util.ImageUtils;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.net.MalformedURLException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * Implements the "Story" tab.
  */
-public class StoryFragment extends Fragment implements PagedPresenter.PagedView<Status> {
+public class StoryFragment extends Fragment implements StoryPresenter.StoryView {
     private static final String LOG_TAG = "StoryFragment";
     private static final String USER_KEY = "UserKey";
 
     private static final int LOADING_DATA_VIEW = 0;
     private static final int ITEM_VIEW = 1;
+
+    User user;
 
     private StoryPresenter presenter;
     private StoryRecyclerViewAdapter storyRecyclerViewAdapter;
@@ -65,12 +70,17 @@ public class StoryFragment extends Fragment implements PagedPresenter.PagedView<
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_story, container, false);
 
         //noinspection ConstantConditions
-        User user = (User) getArguments().getSerializable(USER_KEY);
+        user = (User) getArguments().getSerializable(USER_KEY);
         presenter = new StoryPresenter(this, user);
 
         RecyclerView storyRecyclerView = view.findViewById(R.id.storyRecyclerView);
@@ -90,7 +100,11 @@ public class StoryFragment extends Fragment implements PagedPresenter.PagedView<
 
     @Override
     public void addLoadingFooter() {
-        storyRecyclerViewAdapter.addLoadingFooter();
+        try{
+            storyRecyclerViewAdapter.addLoadingFooter();
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -315,12 +329,15 @@ public class StoryFragment extends Fragment implements PagedPresenter.PagedView<
             return (position == story.size() - 1 && presenter.isLoading()) ? LOADING_DATA_VIEW : ITEM_VIEW;
         }
 
+        public void loadMoreItems() {
+            presenter.loadMoreItems();
+        }
 
         /**
          * Adds a dummy status to the list of statuses so the RecyclerView will display a view (the
          * loading footer view) at the bottom of the list.
          */
-        private void addLoadingFooter() {
+        private void addLoadingFooter() throws MalformedURLException {
             addItem(new Status("Dummy Post", new User("firstName", "lastName", "@coolAlias"), "2020-10-31 00:00:00", new ArrayList<String>() {{
                 add("https://youtube.com");
             }}, new ArrayList<String>() {{
@@ -377,7 +394,7 @@ public class StoryFragment extends Fragment implements PagedPresenter.PagedView<
                 // Run this code later on the UI thread
                 final Handler handler = new Handler(Looper.getMainLooper());
                 handler.postDelayed(() -> {
-                    presenter.loadMoreItems();
+                    storyRecyclerViewAdapter.loadMoreItems();
                 }, 0);
             }
         }

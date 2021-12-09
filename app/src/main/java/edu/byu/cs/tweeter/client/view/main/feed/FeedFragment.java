@@ -29,6 +29,7 @@ import edu.byu.cs.tweeter.client.view.util.ImageUtils;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.net.MalformedURLException;
 import java.util.ArrayList;
@@ -37,7 +38,7 @@ import java.util.List;
 /**
  * Implements the "Feed" tab.
  */
-public class FeedFragment extends Fragment implements PagedPresenter.PagedView<Status> {
+public class FeedFragment extends Fragment implements FeedPresenter.FeedView {
     private static final String LOG_TAG = "FeedFragment";
     private static final String USER_KEY = "UserKey";
 
@@ -47,7 +48,6 @@ public class FeedFragment extends Fragment implements PagedPresenter.PagedView<S
     private User user;
 
     private FeedRecyclerViewAdapter feedRecyclerViewAdapter;
-
     private FeedPresenter presenter;
     private Toast infoToast;
 
@@ -66,6 +66,11 @@ public class FeedFragment extends Fragment implements PagedPresenter.PagedView<S
 
         fragment.setArguments(args);
         return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
     }
 
     @Override

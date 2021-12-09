@@ -13,7 +13,7 @@ public abstract class BackgroundTaskHandler<T extends ServiceObserver> extends H
     private final T observer;
 
     public BackgroundTaskHandler(T observer) {
-        super(Looper.getMainLooper());
+//        super(Looper.getMainLooper());
         this.observer = observer;
     }
 

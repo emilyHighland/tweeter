@@ -6,9 +6,11 @@ import edu.byu.cs.tweeter.model.domain.User;
 
 public class FeedPresenter extends PagedPresenter<Status>{
 
+    public interface FeedView extends PagedView<Status>{}
+
     private final StatusService statusService;
 
-    public FeedPresenter(PagedView<Status> view, User targetUser){
+    public FeedPresenter(FeedView view, User targetUser){
         super(view, targetUser);
         statusService = new StatusService();
     }
@@ -20,7 +22,7 @@ public class FeedPresenter extends PagedPresenter<Status>{
 
     @Override
     protected String getDescription() {
-        return null;
+        return "get feed";
     }
 
     private class GetFeedObserver extends GetItemsObserver implements StatusService.FeedObserver{}

@@ -3,10 +3,12 @@ package edu.byu.cs.tweeter.client.model.backgroundTask.task;
 import android.os.Handler;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.FollowingRequest;
 import edu.byu.cs.tweeter.model.net.response.FollowingResponse;
 import util.Pair;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -21,23 +23,17 @@ public class GetFollowingTask extends PagedUserTask {
     }
 
     @Override
-    protected Pair<List<User>, Boolean> getItems() {
-
-        try {
-            FollowingRequest request;
-            if (getLastItem() == null){
-                request = new FollowingRequest(authToken, targetUser.alias, getLimit(),
-                        null);
-            } else {
-                request = new FollowingRequest(authToken, targetUser.alias, getLimit(),
-                        getLastItem().alias);
-            }
-            FollowingResponse followingResponse = SF.getFollowees(request,"/getfollowing");
-            return new Pair<>(followingResponse.getFollowees(), followingResponse.isSuccess());
-        } catch (Exception e){
-            e.printStackTrace();
-            sendExceptionMessage(e);
+    protected Pair<List<User>, Boolean> getItems() throws IOException, TweeterRemoteException {
+        FollowingRequest request;
+        if (getLastItem() == null){
+            request = new FollowingRequest(authToken, targetUser.alias, getLimit(),
+                    null);
+        } else {
+            request = new FollowingRequest(authToken, targetUser.alias, getLimit(),
+                    getLastItem().alias);
         }
-        return null;
+        FollowingResponse followingResponse = SF.getFollowees(request, "/getfollowing");
+
+        return new Pair<>(followingResponse.getFollowees(), followingResponse.isSuccess());
     }
 }

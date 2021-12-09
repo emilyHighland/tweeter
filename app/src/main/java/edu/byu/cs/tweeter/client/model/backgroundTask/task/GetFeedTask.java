@@ -4,10 +4,12 @@ import android.os.Handler;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.Status;
 import edu.byu.cs.tweeter.model.domain.User;
+import edu.byu.cs.tweeter.model.net.TweeterRemoteException;
 import edu.byu.cs.tweeter.model.net.request.FeedRequest;
 import edu.byu.cs.tweeter.model.net.response.FeedResponse;
 import util.Pair;
 
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -22,22 +24,17 @@ public class GetFeedTask extends PagedStatusTask {
     }
 
     @Override
-    protected Pair<List<Status>, Boolean> getItems() {
-        try {
-            FeedRequest request;
-            if (getLastItem() == null){
-                request = new FeedRequest(authToken, targetUser.alias, getLimit(),
-                        null);
-            } else {
-                request = new FeedRequest(authToken, targetUser.alias, getLimit(),
-                        getLastItem());
-            }
-            FeedResponse feedResponse = SF.getFeed(request,"/getfeed");
-            return new Pair<>(feedResponse.getStatuses(), feedResponse.isSuccess());
-        } catch (Exception e){
-            e.printStackTrace();
-            sendExceptionMessage(e);
+    protected Pair<List<Status>, Boolean> getItems() throws IOException, TweeterRemoteException {
+        FeedRequest request;
+        if (getLastItem() == null){
+            request = new FeedRequest(authToken, targetUser.alias, getLimit(),
+                    null);
+        } else {
+            request = new FeedRequest(authToken, targetUser.alias, getLimit(),
+                    getLastItem());
         }
-        return null;
+        FeedResponse feedResponse = SF.getFeed(request, "/getfeed");
+
+        return new Pair<>(feedResponse.getStatuses(), feedResponse.isSuccess());
     }
 }

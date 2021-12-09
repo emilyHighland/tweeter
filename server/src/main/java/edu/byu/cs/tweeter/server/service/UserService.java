@@ -3,14 +3,10 @@ package edu.byu.cs.tweeter.server.service;
 import com.google.inject.Inject;
 import edu.byu.cs.tweeter.model.domain.AuthToken;
 import edu.byu.cs.tweeter.model.domain.User;
-import edu.byu.cs.tweeter.model.net.request.GetUserRequest;
-import edu.byu.cs.tweeter.model.net.request.LoginRequest;
-import edu.byu.cs.tweeter.model.net.request.LogoutRequest;
-import edu.byu.cs.tweeter.model.net.request.RegisterRequest;
-import edu.byu.cs.tweeter.model.net.response.GetUserResponse;
-import edu.byu.cs.tweeter.model.net.response.LoginResponse;
-import edu.byu.cs.tweeter.model.net.response.RegisterResponse;
-import edu.byu.cs.tweeter.model.net.response.SimpleResponse;
+import edu.byu.cs.tweeter.model.net.request.*;
+import edu.byu.cs.tweeter.model.net.response.*;
+import edu.byu.cs.tweeter.server.dao.AuthTokenDAOInterface;
+import edu.byu.cs.tweeter.server.dao.UserDAOInterface;
 import edu.byu.cs.tweeter.server.dao.factories.DAOFactoryInterface;
 import edu.byu.cs.tweeter.server.util.Pair;
 
@@ -31,11 +27,10 @@ public class UserService {
 
     /** REGISTER */
     public RegisterResponse register(RegisterRequest request){
-
-        // upload image to S3 getting back image url
-        String url = this.factory.getImageDAO().uploadImage(request.getUsername(), request.getImage());
-
         try {
+            // upload image to S3 getting back image url
+            String url = this.factory.getImageDAO().uploadImage(request.getUsername(), request.getImage());
+
             // salt and hash password before uploading
             String saltAndHashedPassword = new SHA1Hashing().getNewPassword(request.getPassword());
 
@@ -53,79 +48,102 @@ public class UserService {
 
         } catch(Exception e){
             e.printStackTrace();
-            throw new RuntimeException("[BadRequest]");
+            throw new RuntimeException("[BadRequest] - unable to register " + e.getMessage());
         }
     }
 
 
     /** LOGIN */
     public LoginResponse login(LoginRequest request){
-        // authenticate user to login
-        Pair<User,String> UserPassword = this.factory.getUserDAO().getUserByID(request.getUsername());
-
-        System.out.println("GOT USER BY ID");
-
-        boolean match = false;
         try {
-            match = new SHA1Hashing().validatePassword(request.getPassword(), UserPassword.getSecond());
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+            Pair<User, String> UserPassword = this.factory.getUserDAO().getUserByID(request.getUsername());
+
+            System.out.println("GOT USER BY ID");
+
+            boolean match = false;
+            try {
+                match = new SHA1Hashing().validatePassword(request.getPassword(), UserPassword.getSecond());
+            } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
+
+            if (!match) {
+                throw new RuntimeException("[BadRequest] - invalid password");
+            }
+
+            // add authToken to table
+            AuthToken authToken = new AuthToken();
+            this.factory.getAuthTokenDAO().addAuthToken(authToken, request.getUsername());
+
+            return new LoginResponse(UserPassword.getFirst(), authToken);
+
+        } catch (Exception e){
             e.printStackTrace();
+            throw new RuntimeException("[BadRequest] - unable to login" + e.getMessage());
         }
-        System.out.println("Passwords Match: " + match);
-
-        if (!match){
-            throw new RuntimeException("[BadRequest] - invalid password");
-        }
-        System.out.println("PASSWORD MATCHES");
-
-        // add authToken to table
-        AuthToken authToken = new AuthToken();
-        this.factory.getAuthTokenDAO().addAuthToken(authToken, request.getUsername());
-
-        return new LoginResponse(UserPassword.getFirst(), authToken);
     }
 
 
     /** LOGOUT */
     public SimpleResponse logout(LogoutRequest request){
-        System.out.println("LOGOUT REQUEST: " + request.getAuthToken());
+        try {
+            this.factory.getAuthTokenDAO().deleteAuthToken(request.getAuthToken());
 
-        this.factory.getAuthTokenDAO().deleteAuthToken(request.getAuthToken());
+            System.out.println("DELETED AUTHTOKEN!");
 
-        System.out.println("DELETED AUTHTOKEN!");
+            return new SimpleResponse();
 
-        return new SimpleResponse();
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest] - unable to logout");
+        }
     }
 
 
     /** GET USER */
     public GetUserResponse getUser(GetUserRequest request){
-        assert request.getAlias() != null;
-        assert request.getAuthToken() != null;
+        // authorized?
+        AuthTokenDAOInterface adao = this.factory.getAuthTokenDAO();
+        String dbAuthToken = adao.getAuthToken(request.getAuthToken().getToken());
+        if (!request.getAuthToken().getToken().equals(dbAuthToken))
+            throw new RuntimeException("[AuthError] unauthenticated request");
 
         try {
-            if (!isValidAuthToken(request.getAlias(), request.getAuthToken()))
-                throw new RuntimeException("[AuthError] unauthenticated request");
-
-            Pair<User,String> UserPass = this.factory.getUserDAO().getUserByID(request.getAlias());
+            Pair<User, String> UserPass = this.factory.getUserDAO().getUserByID(request.getAlias());
 
             if (UserPass.getFirst() == null) {
                 throw new RuntimeException(String.format("[BadRequest] requested user %s does not exist", request.getAlias()));
             }
 
             return new GetUserResponse(UserPass.getFirst());
+
         } catch (Exception e){
             e.printStackTrace();
-            throw e;
+            throw new RuntimeException("[BadRequest] - unable to get user " + e.getMessage());
         }
     }
 
-    /** VALIDATE */
-    private boolean isValidAuthToken(String alias, AuthToken currentAuthToken){
-        String dbAuthToken = this.factory.getAuthTokenDAO().getAuthToken(alias);
-        return dbAuthToken.equals(currentAuthToken.getToken());
+
+    /** COUNTS */
+    public FollowingCountResponse getFollowingCount(FollowingCountRequest request){
+        try {
+            UserDAOInterface udao = this.factory.getUserDAO();
+            return new FollowingCountResponse(udao.getFollowingCount(request.getAlias()));
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest] - unable to get following count " + e.getMessage());
+        }
     }
 
+    public FollowerCountResponse getFollowerCount(FollowerCountRequest request){
+        try {
+            UserDAOInterface udao = this.factory.getUserDAO();
+            return new FollowerCountResponse(udao.getFollowerCount(request.getAlias()));
+        } catch (Exception e){
+            e.printStackTrace();
+            throw new RuntimeException("[BadRequest] - unable to get follower count " + e.getMessage());
+        }
+    }
 
 
     /** S&H */

@@ -22,6 +22,7 @@ import edu.byu.cs.tweeter.client.view.main.MainActivity;
 import edu.byu.cs.tweeter.client.view.util.ImageUtils;
 import edu.byu.cs.tweeter.model.domain.User;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,6 +37,8 @@ public class FollowersFragment extends Fragment implements PagedPresenter.PagedV
 
     private static final int LOADING_DATA_VIEW = 0;
     private static final int ITEM_VIEW = 1;
+
+    User user;
 
     private FollowersPresenter presenter;
     private FollowersRecyclerViewAdapter followersRecyclerViewAdapter;
@@ -59,12 +62,17 @@ public class FollowersFragment extends Fragment implements PagedPresenter.PagedV
     }
 
     @Override
+    public void onCreate(@Nullable Bundle savedInstanceState){
+        super.onCreate(savedInstanceState);
+    }
+
+    @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_followers, container, false);
 
         //noinspection ConstantConditions
-        User user = (User) getArguments().getSerializable(USER_KEY);
+        user = (User) getArguments().getSerializable(USER_KEY);
         presenter = new FollowersPresenter(this, user);
 
         RecyclerView followersRecyclerView = view.findViewById(R.id.followersRecyclerView);
@@ -96,7 +104,7 @@ public class FollowersFragment extends Fragment implements PagedPresenter.PagedV
 
     @Override
     public void displayMoreItems(List<User> followers) {
-        followersRecyclerViewAdapter.addItems(followers);
+        followersRecyclerViewAdapter.displayMoreItems(followers);
     }
 
     @Override
@@ -271,6 +279,14 @@ public class FollowersFragment extends Fragment implements PagedPresenter.PagedV
             return (position == users.size() - 1 && presenter.isLoading()) ? LOADING_DATA_VIEW : ITEM_VIEW;
         }
 
+        public void loadMoreItems() {
+            presenter.loadMoreItems();
+        }
+
+        public void displayMoreItems(List<User> followees){
+            followersRecyclerViewAdapter.addItems(followees);
+        }
+
         /**
          * Adds a dummy user to the list of users so the RecyclerView will display a view (the
          * loading footer view) at the bottom of the list.
@@ -328,7 +344,7 @@ public class FollowersFragment extends Fragment implements PagedPresenter.PagedV
                 // Run this code later on the UI thread
                 final Handler handler = new Handler(Looper.getMainLooper());
                 handler.postDelayed(() -> {
-                    presenter.loadMoreItems();
+                    followersRecyclerViewAdapter.loadMoreItems();
                 }, 0);
             }
 

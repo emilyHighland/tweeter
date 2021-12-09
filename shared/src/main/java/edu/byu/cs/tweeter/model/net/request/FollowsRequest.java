@@ -5,13 +5,24 @@ import edu.byu.cs.tweeter.model.domain.AuthToken;
 public class FollowsRequest {
 
     private AuthToken authToken;
-    private String userAlias;
+    private String followeeAlias;
+    private String followerAlias;
+    private String followeeName;
+    private String followerName;
+    private String followeeImage;
+    private String followerImage;
 
     private FollowsRequest(){}
 
-    public FollowsRequest(AuthToken authToken, String userAlias) {
+    public FollowsRequest(AuthToken authToken, String followeeAlias, String currUserAlias,
+                          String followeeName, String currUserName, String followeeImage, String currUserImage) {
         this.authToken = authToken;
-        this.userAlias = userAlias;
+        this.followeeAlias = followeeAlias;
+        this.followerAlias = currUserAlias;
+        this.followeeName = followeeName;
+        this.followerName = currUserName;
+        this.followeeImage = followeeImage;
+        this.followerImage = currUserImage;
     }
 
     public AuthToken getAuthToken() {
@@ -22,11 +33,51 @@ public class FollowsRequest {
         this.authToken = authToken;
     }
 
-    public String getUserAlias() {
-        return userAlias;
+    public String getFolloweeAlias() {
+        return followeeAlias;
     }
 
-    public void setUserAlias(String userAlias) {
-        this.userAlias = userAlias;
+    public void setFolloweeAlias(String followeeAlias) {
+        this.followeeAlias = followeeAlias;
+    }
+
+    public String getFollowerAlias() {
+        return followerAlias;
+    }
+
+    public void setFollowerAlias(String followerAlias) {
+        this.followerAlias = followerAlias;
+    }
+
+    public String getFolloweeName() {
+        return followeeName;
+    }
+
+    public void setFolloweeName(String followeeName) {
+        this.followeeName = followeeName;
+    }
+
+    public String getFollowerName() {
+        return followerName;
+    }
+
+    public void setFollowerName(String followerName) {
+        this.followerName = followerName;
+    }
+
+    public String getFolloweeImage() {
+        return followeeImage;
+    }
+
+    public void setFolloweeImage(String followeeImage) {
+        this.followeeImage = followeeImage;
+    }
+
+    public String getFollowerImage() {
+        return followerImage;
+    }
+
+    public void setFollowerImage(String followerImage) {
+        this.followerImage = followerImage;
     }
 }
